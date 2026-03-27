@@ -262,7 +262,7 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const ADMIN_PW = 'travel2025';  // ← 這裡可以改成你自己的密碼
+const ADMIN_PW = '2452';  // ← 這裡可以改成你自己的密碼
 
 const firebaseConfig = {
   apiKey: "AIzaSyC-9jdI_UZpB7T5crTh8XQTa28FdU3DBuU",
@@ -468,7 +468,7 @@ function rSplit(){
   if(!members.length){el.innerHTML='<span style="font-size:12px;color:var(--ink3);">請先新增旅伴</span>';return;}
   splitSel=members.slice();
   for(i=0;i<members.length;i++)
-    h+='<button class="sp-chk on" id="sc'+i+'" onclick="togSplit('+i+')">'+ini(members[i])+' '+members[i]+'</button>';
+    h+='<button class="sp-chk on" id="sc'+i+'" onclick="togSplit('+i+')">'+members[i]+'</button>';
   el.innerHTML=h;
 }
 window.togSplit=function(i){
