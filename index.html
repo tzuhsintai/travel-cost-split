@@ -15,26 +15,30 @@
 body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;}
 .app{max-width:680px;margin:0 auto;padding-bottom:80px;}
 
+/* HERO */
 .hero{background:var(--ocean2);padding:1.25rem 1rem 1.5rem;}
 .hero-row{display:flex;align-items:center;gap:10px;}
 .hero-title{font-size:20px;color:#fff;font-weight:600;}
 .hero-sub{font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;}
-.trip-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:12px;color:rgba(255,255,255,0.9);margin-top:8px;}
 .sync-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+.trip-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:12px;color:rgba(255,255,255,0.9);}
+.sync-info{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);}
 .dot{width:7px;height:7px;border-radius:50%;background:#f87171;display:inline-block;}
 .dot.on{background:#4ade80;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-.sync-info{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);}
 
+/* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--ocean2);display:flex;z-index:100;border-top:1px solid rgba(255,255,255,0.1);}
 .bnav-btn{flex:1;background:none;border:none;color:rgba(255,255,255,0.4);font-family:-apple-system,sans-serif;font-size:10px;padding:10px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;border-top:2px solid transparent;}
 .bnav-btn.on{color:#fff;border-top-color:var(--coral);}
 .bnav-icon{font-size:20px;line-height:1;}
 
+/* CONTENT */
 .content{padding:1rem;}
 .tab{display:none;}
 .tab.on{display:block;}
 
+/* CARD */
 .card{background:#fff;border-radius:14px;padding:1rem;margin-bottom:10px;border:1px solid var(--sand3);}
 .card-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
 .cic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
@@ -43,26 +47,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--sa
 label{font-size:12px;color:var(--ink3);display:block;margin-bottom:4px;}
 input,select{width:100%;padding:11px 12px;border:1.5px solid var(--sand3);border-radius:10px;font-size:16px;font-family:-apple-system,sans-serif;background:var(--sand);color:var(--ink);-webkit-appearance:none;appearance:none;outline:none;}
 input:focus,select:focus{border-color:var(--ocean);background:#fff;}
-input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
 .fmb{margin-bottom:10px;}
 .f3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px;}
 
 .btn{display:block;width:100%;padding:13px;border-radius:12px;border:none;background:var(--ocean);color:#fff;font-size:16px;font-weight:600;font-family:-apple-system,sans-serif;cursor:pointer;margin-top:4px;}
 .btn-sm{display:inline-block;width:auto;padding:10px 16px;font-size:14px;border-radius:10px;margin-top:0;}
 .btn-danger{background:#dc2626;}
-.btn-lock{background:var(--ink3);}
+.btn-gray{background:var(--ink3);}
+.btn-outline{background:transparent;border:1.5px solid var(--sand3);color:var(--ink2);}
 
+/* 行程名稱編輯 */
+.name-row{display:flex;align-items:center;gap:8px;}
+.name-row input{flex:1;}
+.edit-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;flex-shrink:0;opacity:0.5;}
+.edit-btn:hover{opacity:1;}
+
+/* MEMBERS */
 .mem-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;min-height:10px;}
-.mtag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px 5px 8px;border-radius:20px;font-size:13px;font-weight:500;border:1.5px solid;}
-.mdel{background:none;border:none;font-size:18px;line-height:1;padding:0 0 0 3px;cursor:pointer;color:inherit;opacity:0.6;}
+.mtag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px 5px 9px;border-radius:20px;font-size:13px;font-weight:500;border:1.5px solid;}
+.mdel{background:none;border:none;font-size:18px;line-height:1;padding:0 0 0 3px;cursor:pointer;color:inherit;opacity:0.5;}
+.mdel:active{opacity:1;}
+.divider{border:none;border-top:1px dashed var(--sand3);margin:12px 0;}
 
+/* SPLIT */
 .sp-row{display:flex;gap:8px;margin-bottom:8px;}
-.sp-btn{flex:1;padding:9px 8px;border-radius:20px;border:1.5px solid var(--sand3);background:var(--sand);font-size:13px;color:var(--ink3);font-family:-apple-system,sans-serif;cursor:pointer;text-align:center;-webkit-appearance:none;}
+.sp-btn{flex:1;padding:9px 8px;border-radius:20px;border:1.5px solid var(--sand3);background:var(--sand);font-size:13px;color:var(--ink3);font-family:-apple-system,sans-serif;cursor:pointer;text-align:center;}
 .sp-btn.on{background:var(--ocean3);color:var(--ocean2);border-color:var(--ocean);}
 .sp-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
-.sp-chk{display:inline-block;padding:8px 12px;border-radius:20px;border:1.5px solid var(--sand3);font-size:13px;background:var(--sand);cursor:pointer;-webkit-appearance:none;font-family:-apple-system,sans-serif;}
+.sp-chk{display:inline-block;padding:8px 12px;border-radius:20px;border:1.5px solid var(--sand3);font-size:13px;background:var(--sand);cursor:pointer;font-family:-apple-system,sans-serif;}
 .sp-chk.on{background:var(--ocean3);color:var(--ocean2);border-color:var(--ocean);}
 
+/* EXPENSE LIST */
 .eitem{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--sand3);}
 .eitem:last-child{border-bottom:none;}
 .eic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
@@ -74,8 +89,9 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
 .eam{font-size:14px;font-weight:500;}
 .etw{font-size:11px;color:var(--ink3);}
 .ctag{font-size:10px;padding:1px 5px;border-radius:4px;background:var(--ocean3);color:var(--ocean2);font-weight:500;}
-.dbtn{margin-top:4px;padding:5px 10px;border-radius:8px;border:1px solid var(--sand3);background:transparent;font-size:12px;color:var(--ink3);cursor:pointer;font-family:-apple-system,sans-serif;-webkit-appearance:none;}
+.dbtn{margin-top:4px;padding:5px 10px;border-radius:8px;border:1px solid var(--sand3);background:transparent;font-size:12px;color:var(--ink3);cursor:pointer;font-family:-apple-system,sans-serif;}
 
+/* SUMMARY */
 .s2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 .scard{border-radius:14px;padding:14px 16px;}
 .scard.bl{background:var(--ocean2);color:#fff;}
@@ -89,15 +105,14 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
 .setl:last-child{border-bottom:none;}
 .samt{margin-left:auto;padding:3px 10px;border-radius:10px;font-size:13px;font-weight:500;background:var(--coral2);color:var(--coral);}
 .empty{text-align:center;padding:1.5rem;color:var(--ink3);font-size:13px;}
-
 .admin-hint{font-size:11px;color:var(--ink3);margin-top:6px;text-align:center;}
-.divider{border:none;border-top:1px dashed var(--sand3);margin:12px 0;}
 
-/* 密碼彈窗 */
+/* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;}
 .overlay.show{display:flex;}
 .modal{background:#fff;border-radius:16px;padding:1.5rem;width:88%;max-width:340px;}
-.modal-title{font-size:16px;font-weight:600;margin-bottom:12px;color:var(--ink);}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--ink);}
+.modal-sub{font-size:13px;color:var(--ink3);margin-bottom:16px;line-height:1.5;}
 .modal-input{width:100%;padding:11px 12px;border:1.5px solid var(--sand3);border-radius:10px;font-size:16px;font-family:-apple-system,sans-serif;background:var(--sand);color:var(--ink);outline:none;margin-bottom:10px;-webkit-appearance:none;}
 .modal-row{display:flex;gap:8px;}
 .modal-btn{flex:1;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:-apple-system,sans-serif;}
@@ -105,16 +120,67 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
 .modal-btn.confirm{background:var(--ocean);color:#fff;}
 .modal-btn.danger{background:#dc2626;color:#fff;}
 
+/* LANDING PAGE */
+.landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;background:var(--sand);}
+.landing-hero{background:var(--ocean2);border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:400px;text-align:center;margin-bottom:1.5rem;}
+.landing-icon{font-size:48px;margin-bottom:12px;}
+.landing-title{font-size:24px;font-weight:600;color:#fff;font-family:-apple-system,sans-serif;}
+.landing-sub{font-size:13px;color:rgba(255,255,255,0.65);margin-top:6px;}
+.landing-card{background:#fff;border-radius:16px;padding:1.25rem;width:100%;max-width:400px;border:1px solid var(--sand3);margin-bottom:10px;}
+.landing-card h2{font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:12px;}
+.trip-history{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.trip-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sand);border-radius:10px;cursor:pointer;border:1.5px solid transparent;}
+.trip-item:active{border-color:var(--ocean);}
+.trip-item-name{font-size:14px;font-weight:500;}
+.trip-item-code{font-size:11px;color:var(--ink3);margin-top:2px;}
+.trip-item-arrow{color:var(--ink3);font-size:16px;}
+
 #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 20px;border-radius:20px;font-size:13px;z-index:999;display:none;white-space:nowrap;}
 </style>
 </head>
 <body>
 <div id="toast"></div>
 
-<!-- 密碼彈窗（改行程名稱用） -->
+<!-- 確認刪除成員 -->
+<div class="overlay" id="del-mem-overlay">
+  <div class="modal">
+    <div class="modal-title">刪除成員</div>
+    <div class="modal-sub" id="del-mem-msg">確定要刪除這位旅伴？</div>
+    <div class="modal-row">
+      <button class="modal-btn cancel" onclick="closeDelMem()">取消</button>
+      <button class="modal-btn danger" onclick="confirmDelMem()">確定刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 確認刪除費用 -->
+<div class="overlay" id="del-exp-overlay">
+  <div class="modal">
+    <div class="modal-title">刪除費用</div>
+    <div class="modal-sub" id="del-exp-msg">確定要刪除這筆費用？</div>
+    <div class="modal-row">
+      <button class="modal-btn cancel" onclick="closeDelExp()">取消</button>
+      <button class="modal-btn danger" onclick="confirmDelExp()">確定刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 確認清除全部 -->
+<div class="overlay" id="clear-overlay">
+  <div class="modal">
+    <div class="modal-title">清除所有記錄</div>
+    <div class="modal-sub">所有成員與費用記錄都會刪除，此操作無法復原。</div>
+    <div class="modal-row">
+      <button class="modal-btn cancel" onclick="closeClear()">取消</button>
+      <button class="modal-btn danger" onclick="doClear()">確定清除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 密碼彈窗（清除用） -->
 <div class="overlay" id="pw-overlay">
   <div class="modal">
-    <div class="modal-title" id="pw-title">請輸入管理員密碼</div>
+    <div class="modal-title">請輸入管理員密碼</div>
     <input class="modal-input" type="password" id="pw-input" placeholder="密碼"/>
     <div class="modal-row">
       <button class="modal-btn cancel" onclick="closePw()">取消</button>
@@ -123,146 +189,161 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
   </div>
 </div>
 
-<!-- 一鍵清除確認彈窗 -->
-<div class="overlay" id="clear-overlay">
-  <div class="modal">
-    <div class="modal-title">確定要清除所有資料？</div>
-    <p style="font-size:13px;color:var(--ink3);margin-bottom:16px;">所有成員、費用記錄都會刪除，此操作無法復原。</p>
-    <div class="modal-row">
-      <button class="modal-btn cancel" onclick="closeClear()">取消</button>
-      <button class="modal-btn danger" onclick="doClear()">確定清除</button>
+<!-- 行程選擇頁 -->
+<div id="landing-page">
+  <div class="landing">
+    <div class="landing-hero">
+      <div class="landing-icon">🧳</div>
+      <div class="landing-title">旅遊分帳</div>
+      <div class="landing-sub">輸入行程代碼，與旅伴即時同步記帳</div>
+    </div>
+    <div class="landing-card">
+      <h2>加入 / 建立行程</h2>
+      <div class="fmb">
+        <label>行程代碼（自訂英數字，例如 vietnam2025）</label>
+        <input type="text" id="trip-code-input" placeholder="輸入行程代碼" autocapitalize="none"/>
+      </div>
+      <div class="fmb">
+        <label>行程名稱</label>
+        <input type="text" id="trip-name-input" placeholder="例：越南河內五日遊"/>
+      </div>
+      <button class="btn" onclick="enterTrip()">進入行程 →</button>
+    </div>
+    <div class="landing-card" id="history-card" style="display:none;">
+      <h2>最近使用的行程</h2>
+      <div class="trip-history" id="trip-history"></div>
     </div>
   </div>
 </div>
 
-<div class="app">
-  <div class="hero">
-    <div class="hero-row">
-      <span style="font-size:22px;">🧳</span>
-      <div>
-        <div class="hero-title">旅遊分帳</div>
-        <div class="hero-sub">讓旅行更輕鬆，帳單不再煩惱</div>
+<!-- 主 App -->
+<div id="main-app" style="display:none;">
+  <div class="app">
+    <div class="hero">
+      <div class="hero-row">
+        <span style="font-size:22px;">🧳</span>
+        <div>
+          <div class="hero-title">旅遊分帳</div>
+          <div class="hero-sub" id="hero-sub">載入中...</div>
+        </div>
+      </div>
+      <div class="sync-row">
+        <div class="trip-badge">🗺️ <span id="tndis">—</span></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="sync-info"><span class="dot" id="syncDot"></span><span id="syncLabel">連線中</span></div>
+          <button onclick="leaveTrip()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,0.9);cursor:pointer;font-family:-apple-system,sans-serif;">切換行程</button>
+        </div>
       </div>
     </div>
-    <div class="sync-row">
-      <div class="trip-badge">🗺️ <span id="tndis">我的旅遊</span></div>
-      <div class="sync-info"><span class="dot" id="syncDot"></span><span id="syncLabel">連線中</span></div>
+
+    <div class="content">
+      <!-- 成員 -->
+      <div class="tab on" id="s0">
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#D4EBF0;">🗺️</div><div class="ctt">行程設定</div></div>
+          <div class="fmb">
+            <label>行程名稱</label>
+            <div class="name-row">
+              <input type="text" id="tname" placeholder="輸入行程名稱" readonly/>
+              <button class="edit-btn" id="edit-name-btn" onclick="toggleEditName()" title="編輯">✏️</button>
+            </div>
+          </div>
+          <button class="btn" id="save-name-btn" onclick="saveTripName()" style="display:none;">儲存名稱</button>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#D4EDD8;">👥</div><div class="ctt">旅伴名單</div></div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            <div style="flex:1;"><label>名字</label><input type="text" id="nmem" placeholder="輸入旅伴名字"/></div>
+            <button class="btn btn-sm" onclick="addMember()">＋ 新增</button>
+          </div>
+          <div class="mem-list" id="mlist"><span style="font-size:12px;color:var(--ink3);">尚未新增旅伴</span></div>
+        </div>
+        <div class="card" style="border-color:#fca5a5;">
+          <div class="card-hd"><div class="cic" style="background:#fee2e2;">⚠️</div><div class="ctt" style="color:#dc2626;">管理員操作</div></div>
+          <button class="btn btn-danger" onclick="openPw()">🗑️ 一鍵清除所有記錄</button>
+          <div class="admin-hint">清除後所有成員與費用歸零，可開始下次旅程</div>
+        </div>
+      </div>
+
+      <!-- 費用 -->
+      <div class="tab" id="s1">
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#F5C4B0;">✈️</div><div class="ctt">記錄花費</div></div>
+          <div class="fmb"><label>費用說明</label><input type="text" id="edesc" placeholder="例：夜市晚餐"/></div>
+          <div class="f3">
+            <div><label>金額</label><input type="number" id="eamt" placeholder="0" min="0" inputmode="decimal"/></div>
+            <div><label>幣別</label>
+              <select id="ecur">
+                <option value="TWD" data-r="1">TWD</option>
+                <option value="JPY" data-r="0.21">JPY</option>
+                <option value="USD" data-r="32">USD</option>
+                <option value="EUR" data-r="35">EUR</option>
+                <option value="KRW" data-r="0.024">KRW</option>
+                <option value="VND" data-r="0.0013">VND</option>
+                <option value="THB" data-r="0.9">THB</option>
+                <option value="SGD" data-r="24">SGD</option>
+                <option value="HKD" data-r="4.1">HKD</option>
+              </select>
+            </div>
+            <div><label>類別</label>
+              <select id="ecat">
+                <option value="🍜">🍜 餐飲</option>
+                <option value="🏨">🏨 住宿</option>
+                <option value="🚆">🚆 交通</option>
+                <option value="🎡">🎡 娛樂</option>
+                <option value="🛍️">🛍️ 購物</option>
+                <option value="💊">💊 其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="fmb"><label>付款人</label><select id="epayer"><option value="">請先新增旅伴</option></select></div>
+          <div class="fmb">
+            <label>分攤方式</label>
+            <div class="sp-row">
+              <button class="sp-btn on" id="speq" onclick="setSplit(0)">平均分攤</button>
+              <button class="sp-btn" id="spcu" onclick="setSplit(1)">自選成員</button>
+            </div>
+            <div class="sp-wrap" id="spwrap"><span style="font-size:12px;color:var(--ink3);">所有旅伴平均分攤</span></div>
+          </div>
+          <button class="btn" onclick="addExpense()">＋ 新增費用</button>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#EDE6D6;">🧾</div><div class="ctt">費用清單</div></div>
+          <div id="elist"><div class="empty">尚無費用記錄</div></div>
+        </div>
+      </div>
+
+      <!-- 結算 -->
+      <div class="tab" id="s2">
+        <div class="s2">
+          <div class="scard bl"><div class="slb">總花費 (TWD)</div><div class="svl" id="stot">$0</div></div>
+          <div class="scard sa"><div class="slb">費用筆數</div><div class="svl" id="scnt">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#D4EDD8;">💰</div><div class="ctt">每人花費</div></div>
+          <div id="psum"><div class="empty">尚無資料</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#F5C4B0;">🤝</div><div class="ctt">清帳明細</div></div>
+          <div id="slist"><div class="empty">尚無資料</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="content">
-
-    <!-- 成員頁 -->
-    <div class="tab on" id="s0">
-      <div class="card">
-        <div class="card-hd"><div class="cic" style="background:#D4EBF0;">🗺️</div><div class="ctt">行程設定</div></div>
-        <div class="fmb">
-          <label>行程名稱</label>
-          <input type="text" id="tname" placeholder="例：越南河內五日遊" readonly/>
-        </div>
-        <button class="btn btn-lock" onclick="openPw('name')">🔒 修改行程名稱</button>
-      </div>
-      <div class="card">
-        <div class="card-hd"><div class="cic" style="background:#D4EDD8;">👥</div><div class="ctt">旅伴名單</div></div>
-        <div style="display:flex;gap:8px;align-items:flex-end;">
-          <div style="flex:1;"><label>名字</label><input type="text" id="nmem" placeholder="輸入旅伴名字"/></div>
-          <button class="btn btn-sm" onclick="addMember()">＋ 新增</button>
-        </div>
-        <div class="mem-list" id="mlist"><span style="font-size:12px;color:var(--ink3);">尚未新增旅伴</span></div>
-        <hr class="divider"/>
-        <button class="btn btn-lock" onclick="openPw('delmem')" style="margin-top:4px;">🔒 刪除成員</button>
-      </div>
-      <div class="card" style="border-color:#fca5a5;">
-        <div class="card-hd"><div class="cic" style="background:#fee2e2;">⚠️</div><div class="ctt" style="color:#dc2626;">管理員操作</div></div>
-        <button class="btn btn-danger" onclick="openPw('clear')">🗑️ 一鍵清除所有記錄</button>
-        <div class="admin-hint">清除後所有成員與費用記錄歸零，可開始下次旅程</div>
-      </div>
-    </div>
-
-    <!-- 費用頁 -->
-    <div class="tab" id="s1">
-      <div class="card">
-        <div class="card-hd"><div class="cic" style="background:#F5C4B0;">✈️</div><div class="ctt">記錄花費</div></div>
-        <div class="fmb"><label>費用說明</label><input type="text" id="edesc" placeholder="例：夜市晚餐"/></div>
-        <div class="f3">
-          <div><label>金額</label><input type="number" id="eamt" placeholder="0" min="0" inputmode="decimal"/></div>
-          <div><label>幣別</label>
-            <select id="ecur">
-              <option value="TWD" data-r="1">TWD</option>
-              <option value="JPY" data-r="0.21">JPY</option>
-              <option value="USD" data-r="32">USD</option>
-              <option value="EUR" data-r="35">EUR</option>
-              <option value="KRW" data-r="0.024">KRW</option>
-              <option value="VND" data-r="0.0013">VND</option>
-              <option value="THB" data-r="0.9">THB</option>
-              <option value="SGD" data-r="24">SGD</option>
-              <option value="HKD" data-r="4.1">HKD</option>
-            </select>
-          </div>
-          <div><label>類別</label>
-            <select id="ecat">
-              <option value="🍜">🍜 餐飲</option>
-              <option value="🏨">🏨 住宿</option>
-              <option value="🚆">🚆 交通</option>
-              <option value="🎡">🎡 娛樂</option>
-              <option value="🛍️">🛍️ 購物</option>
-              <option value="💊">💊 其他</option>
-            </select>
-          </div>
-        </div>
-        <div class="fmb"><label>付款人</label><select id="epayer"><option value="">請先新增旅伴</option></select></div>
-        <div class="fmb">
-          <label>分攤方式</label>
-          <div class="sp-row">
-            <button class="sp-btn on" id="speq" onclick="setSplit(0)">平均分攤</button>
-            <button class="sp-btn" id="spcu" onclick="setSplit(1)">自選成員</button>
-          </div>
-          <div class="sp-wrap" id="spwrap"><span style="font-size:12px;color:var(--ink3);">所有旅伴平均分攤</span></div>
-        </div>
-        <button class="btn" onclick="addExpense()">＋ 新增費用</button>
-      </div>
-      <div class="card">
-        <div class="card-hd"><div class="cic" style="background:#EDE6D6;">🧾</div><div class="ctt">費用清單</div></div>
-        <div id="elist"><div class="empty">尚無費用記錄</div></div>
-      </div>
-    </div>
-
-    <!-- 結算頁 -->
-    <div class="tab" id="s2">
-      <div class="s2">
-        <div class="scard bl"><div class="slb">總花費 (TWD)</div><div class="svl" id="stot">$0</div></div>
-        <div class="scard sa"><div class="slb">費用筆數</div><div class="svl" id="scnt">0</div></div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><div class="cic" style="background:#D4EDD8;">💰</div><div class="ctt">每人花費</div></div>
-        <div id="psum"><div class="empty">尚無資料</div></div>
-      </div>
-      <div class="card">
-        <div class="card-hd"><div class="cic" style="background:#F5C4B0;">🤝</div><div class="ctt">清帳明細</div></div>
-        <div id="slist"><div class="empty">尚無資料</div></div>
-      </div>
-    </div>
-
+  <div class="bnav">
+    <button class="bnav-btn on" id="nb0" onclick="goTab(0)"><span class="bnav-icon">🧑‍🤝‍🧑</span><span>成員</span></button>
+    <button class="bnav-btn" id="nb1" onclick="goTab(1)"><span class="bnav-icon">💳</span><span>費用</span></button>
+    <button class="bnav-btn" id="nb2" onclick="goTab(2)"><span class="bnav-icon">📊</span><span>結算</span></button>
   </div>
-</div>
-
-<div class="bnav">
-  <button class="bnav-btn on" id="nb0" onclick="goTab(0)">
-    <span class="bnav-icon">🧑‍🤝‍🧑</span><span>成員</span>
-  </button>
-  <button class="bnav-btn" id="nb1" onclick="goTab(1)">
-    <span class="bnav-icon">💳</span><span>費用</span>
-  </button>
-  <button class="bnav-btn" id="nb2" onclick="goTab(2)">
-    <span class="bnav-icon">📊</span><span>結算</span>
-  </button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, remove, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const ADMIN_PW = '2452'; 
+const ADMIN_PW = 'travel2025';
+const HISTORY_KEY = 'trip_history';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC-9jdI_UZpB7T5crTh8XQTa28FdU3DBuU",
@@ -276,7 +357,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const ROOT = ref(db, 'trip');
 
 var CL=[
   {bg:'#D4EBF0',bd:'#2A6B7C',tx:'#1E4F5C'},
@@ -286,9 +366,15 @@ var CL=[
   {bg:'#EDE6D6',bd:'#8A7A5A',tx:'#4A3A1A'},
   {bg:'#E8E0F0',bd:'#6A4A8A',tx:'#3A1A5A'}
 ];
-var members=[],expenses=[],tripName='我的旅遊',splitMode=0,splitSel=[];
+
+var members=[],expenses=[],tripName='',splitMode=0,splitSel=[];
 var writing=false;
-var pwAction='';  // 目前密碼彈窗要做什麼
+var currentTripCode='';
+var ROOT=null;
+var connUnsub=null,dataUnsub=null;
+var pendingDelMemIdx=-1;
+var pendingDelExpId=-1;
+var editingName=false;
 
 // ── TOAST ──────────────────────────────────────────
 function toast(m){
@@ -301,40 +387,110 @@ function toast(m){
 function setSyncStatus(ok){
   var dot=document.getElementById('syncDot');
   var lbl=document.getElementById('syncLabel');
-  if(dot){dot.className=ok?'dot on':'dot';}
-  if(lbl){lbl.textContent=ok?'已同步':'未連線';}
+  if(dot)dot.className=ok?'dot on':'dot';
+  if(lbl)lbl.textContent=ok?'已同步':'未連線';
+}
+
+// ── HISTORY ────────────────────────────────────────
+function getHistory(){
+  try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return [];}
+}
+function saveHistory(code,name){
+  var h=getHistory().filter(function(x){return x.code!==code;});
+  h.unshift({code:code,name:name||code});
+  if(h.length>5)h=h.slice(0,5);
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(h));
+}
+function renderHistory(){
+  var h=getHistory();
+  var card=document.getElementById('history-card');
+  var el=document.getElementById('trip-history');
+  if(!h.length){card.style.display='none';return;}
+  card.style.display='block';
+  el.innerHTML=h.map(function(x){
+    return '<div class="trip-item" onclick="quickEnter(\''+x.code+'\',\''+x.name+'\')">'
+      +'<div><div class="trip-item-name">'+x.name+'</div><div class="trip-item-code">代碼：'+x.code+'</div></div>'
+      +'<div class="trip-item-arrow">›</div></div>';
+  }).join('');
+}
+
+window.quickEnter=function(code,name){
+  document.getElementById('trip-code-input').value=code;
+  document.getElementById('trip-name-input').value=name;
+  enterTrip();
+};
+
+window.enterTrip=function(){
+  var code=document.getElementById('trip-code-input').value.trim().toLowerCase().replace(/\s+/g,'');
+  var name=document.getElementById('trip-name-input').value.trim();
+  if(!code){toast('請輸入行程代碼');return;}
+  currentTripCode=code;
+  ROOT=ref(db,'trips/'+code);
+  document.getElementById('landing-page').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('hero-sub').textContent='行程代碼：'+code;
+  startListening(name);
+};
+
+window.leaveTrip=function(){
+  if(dataUnsub)dataUnsub();
+  if(connUnsub)connUnsub();
+  members=[];expenses=[];tripName='';splitMode=0;splitSel=[];
+  currentTripCode='';ROOT=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('landing-page').style.display='block';
+  renderHistory();
+  goTab(0);
+};
+
+function startListening(defaultName){
+  var connRef=ref(db,'.info/connected');
+  connUnsub=onValue(connRef,function(snap){setSyncStatus(snap.val()===true);});
+
+  dataUnsub=onValue(ROOT,function(snap){
+    if(writing)return;
+    var d=snap.val();
+    if(!d){
+      // 新行程，若有傳入名稱就初始化
+      if(defaultName){
+        tripName=defaultName;
+        set(ROOT,{members:[],expenses:[],tripName:tripName});
+      }
+      renderAll();
+      setSyncStatus(true);
+      return;
+    }
+    members=d.members||[];
+    expenses=d.expenses||[];
+    tripName=d.tripName||currentTripCode;
+    renderAll();
+    setSyncStatus(true);
+    saveHistory(currentTripCode,tripName);
+  },function(){setSyncStatus(false);});
+}
+
+function renderAll(){
+  var tn=document.getElementById('tname');
+  if(tn)tn.value=tripName;
+  var tnd=document.getElementById('tndis');
+  if(tnd)tnd.textContent=tripName||currentTripCode;
+  rMem();rPayer();rSplit();rExp();rSum();
 }
 
 function persist(){
   writing=true;
   set(ROOT,{members:members,expenses:expenses,tripName:tripName})
-    .then(function(){setSyncStatus(true);writing=false;})
+    .then(function(){setSyncStatus(true);writing=false;saveHistory(currentTripCode,tripName);})
     .catch(function(){setSyncStatus(false);writing=false;});
 }
-
-var connRef=ref(db,'.info/connected');
-onValue(connRef,function(snap){setSyncStatus(snap.val()===true);});
-
-onValue(ROOT,function(snap){
-  if(writing)return;
-  var d=snap.val();
-  if(!d){setSyncStatus(true);return;}
-  members=d.members||[];
-  expenses=d.expenses||[];
-  tripName=d.tripName||'我的旅遊';
-  var tn=document.getElementById('tname');
-  if(tn)tn.value=tripName;
-  var tnd=document.getElementById('tndis');
-  if(tnd)tnd.textContent=tripName;
-  rMem();rPayer();rSplit();rExp();rSum();
-  setSyncStatus(true);
-},function(err){setSyncStatus(false);});
 
 // ── TABS ───────────────────────────────────────────
 function goTab(i){
   for(var j=0;j<3;j++){
-    document.getElementById('s'+j).className=j===i?'tab on':'tab';
-    document.getElementById('nb'+j).className=j===i?'bnav-btn on':'bnav-btn';
+    var s=document.getElementById('s'+j);
+    var n=document.getElementById('nb'+j);
+    if(s)s.className=j===i?'tab on':'tab';
+    if(n)n.className=j===i?'bnav-btn on':'bnav-btn';
   }
   if(i===2)rSum();
   window.scrollTo(0,0);
@@ -345,54 +501,44 @@ window.goTab=goTab;
 function gc(name){return CL[Math.max(0,members.indexOf(name))%CL.length];}
 function ini(n){return n.substring(0,2).toUpperCase();}
 
-// ── 密碼彈窗 ───────────────────────────────────────
-window.openPw=function(action){
-  pwAction=action;
-  var title='請輸入管理員密碼';
-  if(action==='delmem')title='輸入密碼後可刪除成員';
-  if(action==='clear')title='輸入密碼以清除所有記錄';
-  document.getElementById('pw-title').textContent=title;
-  document.getElementById('pw-input').value='';
-  document.getElementById('pw-overlay').className='overlay show';
-  setTimeout(function(){document.getElementById('pw-input').focus();},100);
-};
-window.closePw=function(){
-  document.getElementById('pw-overlay').className='overlay';
-};
-window.confirmPw=function(){
-  var v=document.getElementById('pw-input').value;
-  if(v!==ADMIN_PW){toast('密碼錯誤');return;}
-  closePw();
-  if(pwAction==='name'){openEditName();}
-  else if(pwAction==='delmem'){openDelMem();}
-  else if(pwAction==='clear'){openClear();}
+// ── 行程名稱編輯 ────────────────────────────────────
+window.toggleEditName=function(){
+  var input=document.getElementById('tname');
+  var saveBtn=document.getElementById('save-name-btn');
+  var editBtn=document.getElementById('edit-name-btn');
+  if(!editingName){
+    editingName=true;
+    input.removeAttribute('readonly');
+    input.style.background='#fff';
+    input.style.borderColor='var(--ocean)';
+    input.focus();
+    saveBtn.style.display='block';
+    editBtn.textContent='✕';
+  } else {
+    editingName=false;
+    input.setAttribute('readonly','');
+    input.style.background='';
+    input.style.borderColor='';
+    input.value=tripName;
+    saveBtn.style.display='none';
+    editBtn.textContent='✏️';
+  }
 };
 
-// ── 修改行程名稱 ────────────────────────────────────
-function openEditName(){
-  var el=document.getElementById('tname');
-  el.removeAttribute('readonly');
-  el.focus();
-  el.style.background='#fff';
-  el.style.borderColor='var(--ocean)';
-  // 改成儲存按鈕
-  var btn=document.querySelector('.btn-lock');
-  if(btn){btn.textContent='✅ 儲存行程名稱';btn.onclick=doSaveName;btn.className='btn';}
-}
-function doSaveName(){
+window.saveTripName=function(){
   var v=document.getElementById('tname').value.trim();
   if(!v){toast('請輸入行程名稱');return;}
   tripName=v;
   document.getElementById('tndis').textContent=v;
-  // 鎖回去
-  var el=document.getElementById('tname');
-  el.setAttribute('readonly','');
-  el.style.background='';el.style.borderColor='';
-  var btn=document.querySelector('.btn');
-  if(btn){btn.textContent='🔒 修改行程名稱';btn.onclick=function(){openPw('name');};btn.className='btn btn-lock';}
+  var input=document.getElementById('tname');
+  input.setAttribute('readonly','');
+  input.style.background='';
+  input.style.borderColor='';
+  document.getElementById('save-name-btn').style.display='none';
+  document.getElementById('edit-name-btn').textContent='✏️';
+  editingName=false;
   persist();toast('已儲存 ✓');
-}
-window.saveTripName=doSaveName;
+};
 
 // ── 成員 ───────────────────────────────────────────
 window.addMember=function(){
@@ -403,21 +549,23 @@ window.addMember=function(){
   rMem();rPayer();rSplit();persist();toast('已新增 '+name+' ✓');
 };
 
-var delMemberMode=false;
-function openDelMem(){
-  delMemberMode=true;
-  rMem();
-  toast('請點選要刪除的成員');
-}
-
-window.delMember=function(i){
-  if(!delMemberMode){toast('需要管理員密碼才能刪除');return;}
-  var n=members[i];
-  members.splice(i,1);
+window.askDelMember=function(i){
+  pendingDelMemIdx=i;
+  document.getElementById('del-mem-msg').textContent='確定要刪除「'+members[i]+'」？';
+  document.getElementById('del-mem-overlay').className='overlay show';
+};
+window.closeDelMem=function(){
+  document.getElementById('del-mem-overlay').className='overlay';
+  pendingDelMemIdx=-1;
+};
+window.confirmDelMem=function(){
+  if(pendingDelMemIdx<0)return;
+  var n=members[pendingDelMemIdx];
+  members.splice(pendingDelMemIdx,1);
   expenses=expenses.map(function(e){
     return Object.assign({},e,{sw:(e.sw||[]).filter(function(x){return x!==n;})});
   });
-  delMemberMode=false;
+  closeDelMem();
   rMem();rPayer();rSplit();rExp();persist();toast('已刪除 '+n);
 };
 
@@ -426,14 +574,11 @@ function rMem(){
   if(!members.length){el.innerHTML='<span style="font-size:12px;color:var(--ink3);">尚未新增旅伴</span>';return;}
   for(i=0;i<members.length;i++){
     m=members[i];c=gc(m);
-    var delBtn=delMemberMode
-      ?'<button class="mdel" onclick="delMember('+i+')" style="opacity:1;color:#dc2626;">×</button>'
-      :'';
-    h+='<div class="mtag" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+m+delBtn+'</div>';
+    h+='<div class="mtag" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'
+      +m+'<button class="mdel" onclick="askDelMember('+i+')">×</button></div>';
   }
   el.innerHTML=h;
 }
-
 function rPayer(){
   var s=document.getElementById('epayer'),h='',i;
   if(!members.length){s.innerHTML='<option value="">請先新增旅伴</option>';return;}
@@ -442,15 +587,25 @@ function rPayer(){
 }
 
 // ── 清除 ───────────────────────────────────────────
+window.openPw=function(){
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-overlay').className='overlay show';
+  setTimeout(function(){document.getElementById('pw-input').focus();},100);
+};
+window.closePw=function(){document.getElementById('pw-overlay').className='overlay';};
+window.confirmPw=function(){
+  if(document.getElementById('pw-input').value!==ADMIN_PW){toast('密碼錯誤');return;}
+  closePw();
+  openClear();
+};
 function openClear(){document.getElementById('clear-overlay').className='overlay show';}
 window.closeClear=function(){document.getElementById('clear-overlay').className='overlay';};
 window.doClear=function(){
-  members=[];expenses=[];tripName='我的旅遊';
+  members=[];expenses=[];tripName=currentTripCode;
   remove(ROOT).then(function(){setSyncStatus(true);});
   document.getElementById('tname').value='';
-  document.getElementById('tndis').textContent='我的旅遊';
+  document.getElementById('tndis').textContent=currentTripCode;
   rMem();rPayer();rSplit();rExp();
-  // 直接重置結算頁（不透過 rSum，因為 members 為空）
   document.getElementById('stot').textContent='TWD 0';
   document.getElementById('scnt').textContent='0';
   document.getElementById('psum').innerHTML='<div class="empty">尚無資料</div>';
@@ -500,10 +655,23 @@ window.addExpense=function(){
   document.getElementById('eamt').value='';
   rExp();persist();toast('已記錄 ✓');
 };
-window.delExp=function(id){
-  expenses=expenses.filter(function(e){return e.id!==id;});
-  rExp();persist();
+
+window.askDelExp=function(id){
+  pendingDelExpId=id;
+  var e=expenses.find(function(x){return x.id===id;});
+  document.getElementById('del-exp-msg').textContent='確定要刪除「'+(e?e.desc:'此費用')+'」？';
+  document.getElementById('del-exp-overlay').className='overlay show';
 };
+window.closeDelExp=function(){
+  document.getElementById('del-exp-overlay').className='overlay';
+  pendingDelExpId=-1;
+};
+window.confirmDelExp=function(){
+  if(pendingDelExpId<0)return;
+  expenses=expenses.filter(function(e){return e.id!==pendingDelExpId;});
+  closeDelExp();rExp();persist();
+};
+
 function rExp(){
   var el=document.getElementById('elist'),h='',i,e,c,sl,am;
   if(!expenses.length){el.innerHTML='<div class="empty">尚無費用記錄</div>';return;}
@@ -516,7 +684,7 @@ function rExp(){
       +'<div class="emt"><span class="pchip" style="background:'+c.bg+';color:'+c.tx+';">'+e.payer+'</span> 付 · '+sl+'</div></div>'
       +'<div class="ert"><div class="eam"><span class="ctag">'+e.cur+'</span> '+am+'</div>'
       +'<div class="etw">≈ TWD '+Math.round(e.twd).toLocaleString()+'</div>'
-      +'<button class="dbtn" onclick="delExp('+e.id+')">刪除</button></div></div>';
+      +'<button class="dbtn" onclick="askDelExp('+e.id+')">刪除</button></div></div>';
   }
   el.innerHTML=h;rSum();
 }
@@ -528,10 +696,8 @@ function rSum(){
   for(i=0;i<members.length;i++){paid[members[i]]=0;owed[members[i]]=0;}
   for(i=0;i<expenses.length;i++){
     e=expenses[i];paid[e.payer]=(paid[e.payer]||0)+e.twd;
-    if((e.sw||[]).length){
-      sh=e.twd/(e.sw||[]).length;
-      for(j=0;j<(e.sw||[]).length;j++){m=e.sw[j];owed[m]=(owed[m]||0)+sh;}
-    }
+    if((e.sw||[]).length){sh=e.twd/(e.sw||[]).length;
+      for(j=0;j<(e.sw||[]).length;j++){m=e.sw[j];owed[m]=(owed[m]||0)+sh;}}
   }
   var tot=0;for(i=0;i<expenses.length;i++)tot+=expenses[i].twd;
   document.getElementById('stot').textContent='TWD '+Math.round(tot).toLocaleString();
@@ -555,8 +721,7 @@ function rSum(){
   var sl2=document.getElementById('slist'),bal={},deb=[],cre=[],sets=[],di=0,ci=0,pay,s,fc,tc,h2='';
   for(i=0;i<members.length;i++){m=members[i];bal[m]=Math.round((paid[m]||0)-(owed[m]||0));
     if(bal[m]<0)deb.push([m,-bal[m]]);else if(bal[m]>0)cre.push([m,bal[m]]);}
-  deb.sort(function(a,b){return a[1]-b[1];});
-  cre.sort(function(a,b){return b[1]-a[1];});
+  deb.sort(function(a,b){return a[1]-b[1];});cre.sort(function(a,b){return b[1]-a[1];});
   while(di<deb.length&&ci<cre.length){
     pay=Math.min(deb[di][1],cre[ci][1]);
     if(pay>0)sets.push({f:deb[di][0],t:cre[ci][0],a:pay});
@@ -575,6 +740,9 @@ function rSum(){
   }
   sl2.innerHTML=h2;
 }
+
+// ── INIT ───────────────────────────────────────────
+renderHistory();
 </script>
 </body>
 </html>
