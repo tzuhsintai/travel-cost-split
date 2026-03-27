@@ -160,7 +160,7 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
           <label>行程名稱</label>
           <input type="text" id="tname" placeholder="例：越南河內五日遊" readonly/>
         </div>
-        <button class="btn btn-lock" onclick="openPw('name')">🔒 修改行程名稱（管理員）</button>
+        <button class="btn btn-lock" onclick="openPw('name')">🔒 修改行程名稱</button>
       </div>
       <div class="card">
         <div class="card-hd"><div class="cic" style="background:#D4EDD8;">👥</div><div class="ctt">旅伴名單</div></div>
@@ -170,7 +170,7 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
         </div>
         <div class="mem-list" id="mlist"><span style="font-size:12px;color:var(--ink3);">尚未新增旅伴</span></div>
         <hr class="divider"/>
-        <button class="btn btn-lock" onclick="openPw('delmem')" style="margin-top:4px;">🔒 管理員：刪除成員</button>
+        <button class="btn btn-lock" onclick="openPw('delmem')" style="margin-top:4px;">🔒 刪除成員</button>
       </div>
       <div class="card" style="border-color:#fca5a5;">
         <div class="card-hd"><div class="cic" style="background:#fee2e2;">⚠️</div><div class="ctt" style="color:#dc2626;">管理員操作</div></div>
@@ -389,7 +389,7 @@ function doSaveName(){
   el.setAttribute('readonly','');
   el.style.background='';el.style.borderColor='';
   var btn=document.querySelector('.btn');
-  if(btn){btn.textContent='🔒 修改行程名稱（管理員）';btn.onclick=function(){openPw('name');};btn.className='btn btn-lock';}
+  if(btn){btn.textContent='🔒 修改行程名稱';btn.onclick=function(){openPw('name');};btn.className='btn btn-lock';}
   persist();toast('已儲存 ✓');
 }
 window.saveTripName=doSaveName;
