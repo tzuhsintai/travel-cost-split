@@ -262,7 +262,7 @@ input[readonly]{background:var(--sand2);color:var(--ink2);cursor:not-allowed;}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-const ADMIN_PW = '2452';
+const ADMIN_PW = '2452'; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyC-9jdI_UZpB7T5crTh8XQTa28FdU3DBuU",
@@ -446,12 +446,15 @@ function openClear(){document.getElementById('clear-overlay').className='overlay
 window.closeClear=function(){document.getElementById('clear-overlay').className='overlay';};
 window.doClear=function(){
   members=[];expenses=[];tripName='我的旅遊';
-  remove(ROOT).then(function(){
-    document.getElementById('tname').value='';
-    document.getElementById('tndis').textContent='我的旅遊';
-    rMem();rPayer();rSplit();rExp();rSum();
-    setSyncStatus(true);
-  });
+  remove(ROOT).then(function(){setSyncStatus(true);});
+  document.getElementById('tname').value='';
+  document.getElementById('tndis').textContent='我的旅遊';
+  rMem();rPayer();rSplit();rExp();
+  // 直接重置結算頁（不透過 rSum，因為 members 為空）
+  document.getElementById('stot').textContent='TWD 0';
+  document.getElementById('scnt').textContent='0';
+  document.getElementById('psum').innerHTML='<div class="empty">尚無資料</div>';
+  document.getElementById('slist').innerHTML='<div class="empty">尚無資料</div>';
   closeClear();toast('已清除所有記錄 ✓');
 };
 
