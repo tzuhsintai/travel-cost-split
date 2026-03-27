@@ -429,7 +429,7 @@ function rMem(){
     var delBtn=delMemberMode
       ?'<button class="mdel" onclick="delMember('+i+')" style="opacity:1;color:#dc2626;">×</button>'
       :'';
-    h+='<div class="mtag" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+' '+m+delBtn+'</div>';
+    h+='<div class="mtag" style="background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+m+delBtn+'</div>';
   }
   el.innerHTML=h;
 }
