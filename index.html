@@ -698,112 +698,188 @@ function rExp(){
 }
 
 // ── 結算 ───────────────────────────────────────────
-function fmtAmt(amt,cur){
-  var big=['VND','KRW'];
-  return (big.indexOf(cur)>=0?Math.round(amt):Number(amt).toFixed(big.indexOf(cur)>=0?0:2).replace(/\.00$/,'')).toLocaleString();
-}
-
 function rSum(){
   if(!members.length)return;
-  var paid={},owed={},i,e,sh,m,j;
-  for(i=0;i<members.length;i++){paid[members[i]]=0;owed[members[i]]=0;}
+  var i,e,m,j;
+
+  // 幣別列表
+  var currencies=[];
   for(i=0;i<expenses.length;i++){
-    e=expenses[i];
-    paid[e.payer]=(paid[e.payer]||0)+e.twd;
-    if((e.sw||[]).length){
-      sh=e.twd/(e.sw||[]).length;
-      for(j=0;j<(e.sw||[]).length;j++){m=e.sw[j];owed[m]=(owed[m]||0)+sh;}
+    if(currencies.indexOf(expenses[i].cur)<0)currencies.push(expenses[i].cur);
+  }
+
+  // 每人每幣別：已墊(paid) / 應付(owed)
+  // paidByCur[m][cur], owedByCur[m][cur]
+  var paidByCur={}, owedByCur={}, paidTwd={}, owedTwd={};
+  for(i=0;i<members.length;i++){
+    m=members[i];
+    paidByCur[m]={};owedByCur[m]={};paidTwd[m]=0;owedTwd[m]=0;
+    for(var ci=0;ci<currencies.length;ci++){
+      paidByCur[m][currencies[ci]]=0;
+      owedByCur[m][currencies[ci]]=0;
     }
   }
+  for(i=0;i<expenses.length;i++){
+    e=expenses[i];
+    if(paidByCur[e.payer]){
+      paidByCur[e.payer][e.cur]=(paidByCur[e.payer][e.cur]||0)+e.amt;
+      paidTwd[e.payer]=(paidTwd[e.payer]||0)+e.twd;
+    }
+    if((e.sw||[]).length){
+      var shAmt=e.amt/(e.sw||[]).length;
+      var shTwd=e.twd/(e.sw||[]).length;
+      for(j=0;j<(e.sw||[]).length;j++){
+        m=e.sw[j];
+        if(owedByCur[m]){
+          owedByCur[m][e.cur]=(owedByCur[m][e.cur]||0)+shAmt;
+          owedTwd[m]=(owedTwd[m]||0)+shTwd;
+        }
+      }
+    }
+  }
+
   var tot=0;
   for(i=0;i<expenses.length;i++)tot+=expenses[i].twd;
   document.getElementById('stot').textContent='TWD '+Math.round(tot).toLocaleString();
   document.getElementById('scnt').textContent=expenses.length;
 
-  // 每人花費（含各幣別明細）
-  // 建立每人的幣別明細：paidDetail[m][cur] = 已付原幣金額, owedDetail[m][cur] = 應付原幣金額
-  var paidDetail={}, owedDetail={};
-  for(i=0;i<members.length;i++){paidDetail[members[i]]={};owedDetail[members[i]]={};}
-  for(i=0;i<expenses.length;i++){
-    e=expenses[i];
-    var cur=e.cur, amt=e.amt;
-    // 付款人已墊
-    if(!paidDetail[e.payer][cur])paidDetail[e.payer][cur]=0;
-    paidDetail[e.payer][cur]+=amt;
-    // 分攤者應付
-    if((e.sw||[]).length){
-      var sh2=amt/(e.sw||[]).length;
-      for(j=0;j<(e.sw||[]).length;j++){
-        m=e.sw[j];
-        if(!owedDetail[m][cur])owedDetail[m][cur]=0;
-        owedDetail[m][cur]+=sh2;
-      }
-    }
-  }
-  function fmtCurAmt(a,c){
+  function fmtA(a,c){
     var big=['VND','KRW'];
-    return big.indexOf(c)>=0?Math.round(a).toLocaleString():Number(a.toFixed(1)).toLocaleString();
+    if(big.indexOf(c)>=0)return Math.round(a).toLocaleString();
+    var r=Math.round(a*10)/10;
+    return r===Math.round(r)?Math.round(r).toLocaleString():(r.toFixed(1).toLocaleString());
   }
-  function renderCurDetail(detail){
-    var parts=[];
-    for(var c in detail){if(detail[c]>0)parts.push('<span class="ctag">'+c+'</span> '+fmtCurAmt(detail[c],c));}
-    return parts.join(' <span style="color:var(--ink3);">·</span> ');
+  // 計算各幣別匯率（從 expenses 反推）
+  var rateMap={};
+  for(i=0;i<expenses.length;i++){
+    if(!rateMap[expenses[i].cur]&&expenses[i].amt>0)
+      rateMap[expenses[i].cur]=expenses[i].twd/expenses[i].amt;
   }
+  function twdOf(amt,cur){return amt*(rateMap[cur]||1);}
 
-  var ps=document.getElementById('psum'),h='',net,badge,c;
+  var ps=document.getElementById('psum'),h='';
   if(!expenses.length){ps.innerHTML='<div class="empty">尚無資料</div>';}
   else{
     for(i=0;i<members.length;i++){
-      m=members[i];c=gc(m);net=Math.round((paid[m]||0)-(owed[m]||0));
-      badge=net>=0
-        ?'<div style="text-align:right"><div style="font-size:13px;color:#3A7D44;font-weight:600;">+TWD '+net.toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">可收回</div></div>'
-        :'<div style="text-align:right"><div style="font-size:13px;color:#E8633A;font-weight:600;">−TWD '+Math.abs(net).toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">需還款</div></div>';
-      var paidLine=renderCurDetail(paidDetail[m]);
-      var owedLine=renderCurDetail(owedDetail[m]);
-      h+='<div class="prow" style="flex-wrap:wrap;gap:6px;">'
-        +'<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">'
-        +'<div class="av" style="width:34px;height:34px;font-size:12px;flex-shrink:0;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
-        +'<div style="min-width:0;">'
-        +'<div style="font-size:14px;font-weight:500;">'+m+'</div>'
-        +(paidLine?'<div style="font-size:11px;color:var(--ink3);margin-top:2px;">已墊：'+paidLine+'</div>':'')
-        +(owedLine?'<div style="font-size:11px;color:var(--ink3);">應付：'+owedLine+'</div>':'')
-        +'<div style="font-size:11px;color:var(--ink3);">≈ 已墊 TWD '+Math.round(paid[m]||0).toLocaleString()+' · 應付 TWD '+Math.round(owed[m]||0).toLocaleString()+'</div>'
-        +'</div></div>'+badge+'</div>';
+      m=members[i];
+      var c=gc(m);
+      var netTwd=Math.round((paidTwd[m]||0)-(owedTwd[m]||0));
+      var netSign=netTwd>=0;
+      // 建立幣別行
+      var rows='';
+      // TWD 合計行
+      rows+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid #eee;">'
+        +'<span style="font-size:11px;color:var(--ink3);">已墊 / 應付（TWD 合計）</span>'
+        +'<span style="font-size:12px;color:var(--ink2);">已墊 TWD '+Math.round(paidTwd[m]).toLocaleString()+' / 應付 TWD '+Math.round(owedTwd[m]).toLocaleString()+'</span></div>';
+      // 各幣別明細
+      for(var ci2=0;ci2<currencies.length;ci2++){
+        var cur2=currencies[ci2];
+        var p2=paidByCur[m][cur2]||0;
+        var o2=owedByCur[m][cur2]||0;
+        if(p2<=0&&o2<=0)continue;
+        var rate2=rateMap[cur2]||1;
+        var line='';
+        if(p2>0)line+='已墊 '+cur2+' '+fmtA(p2,cur2);
+        if(p2>0&&o2>0)line+='　';
+        if(o2>0)line+='應付 '+cur2+' '+fmtA(o2,cur2);
+        if(cur2!=='TWD'){
+          var twdNote='';
+          if(p2>0)twdNote+='≈ TWD '+Math.round(p2*rate2).toLocaleString();
+          if(p2>0&&o2>0)twdNote+=' / ';
+          if(o2>0)twdNote+=(p2>0?'':'≈ TWD ')+Math.round(o2*rate2).toLocaleString();
+          rows+='<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid #f0ebe0;">'
+            +'<span style="font-size:12px;color:var(--ink3);">'+line+'</span>'
+            +'<span style="font-size:11px;color:var(--ink3);">'+twdNote+'</span></div>';
+        } else {
+          rows+='<div style="padding:3px 0;border-bottom:0.5px solid #f0ebe0;font-size:12px;color:var(--ink3);">'+line+'</div>';
+        }
+      }
+      h+='<div style="padding:10px 0;border-bottom:1px dashed var(--sand3);">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<div class="av" style="width:34px;height:34px;font-size:12px;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
+        +'<span style="font-size:15px;font-weight:600;">'+m+'</span></div>'
+        +'<div style="text-align:right;">'
+        +(netSign
+          ?'<div style="font-size:13px;color:#3A7D44;font-weight:600;">+TWD '+netTwd.toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">可收回</div>'
+          :'<div style="font-size:13px;color:#E8633A;font-weight:600;">−TWD '+Math.abs(netTwd).toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">需還款</div>')
+        +'</div></div>'
+        +rows+'</div>';
     }
     ps.innerHTML=h;
   }
 
-  // 清帳明細（以 TWD 計算）
-  var sl2=document.getElementById('slist'),bal={},deb=[],cre=[],sets=[],di=0,ci=0,pay,s,fc,tc,h2='';
-  for(i=0;i<members.length;i++){
-    m=members[i];
-    bal[m]=Math.round((paid[m]||0)-(owed[m]||0));
-    if(bal[m]<0)deb.push([m,-bal[m]]);
-    else if(bal[m]>0)cre.push([m,bal[m]]);
+  // ── 清帳明細：每幣別分開計算 ──────────────────────────
+  var sl2=document.getElementById('slist');
+  if(!expenses.length){sl2.innerHTML='<div class="empty">尚無資料</div>';return;}
+
+  // 對每個幣別獨立做最小轉帳計算
+  var allSets={}; // allSets[cur] = [{f,t,a,cur}]
+  for(var ci3=0;ci3<currencies.length;ci3++){
+    var cur3=currencies[ci3];
+    var balC={};
+    for(i=0;i<members.length;i++)balC[members[i]]=0;
+    for(i=0;i<expenses.length;i++){
+      e=expenses[i];
+      if(e.cur!==cur3)continue;
+      balC[e.payer]=(balC[e.payer]||0)+e.amt;
+      if((e.sw||[]).length){
+        var sc=e.amt/(e.sw||[]).length;
+        for(j=0;j<(e.sw||[]).length;j++)balC[e.sw[j]]=(balC[e.sw[j]]||0)-sc;
+      }
+    }
+    var debC=[],creC=[];
+    for(m in balC){
+      var bv=Math.round(balC[m]*100)/100;
+      if(bv<-0.01)debC.push([m,-bv]);
+      else if(bv>0.01)creC.push([m,bv]);
+    }
+    debC.sort(function(a,b){return a[1]-b[1];});
+    creC.sort(function(a,b){return b[1]-a[1];});
+    var di2=0,ci4=0;
+    allSets[cur3]=[];
+    while(di2<debC.length&&ci4<creC.length){
+      var pv=Math.round(Math.min(debC[di2][1],creC[ci4][1])*100)/100;
+      if(pv>0.01)allSets[cur3].push({f:debC[di2][0],t:creC[ci4][0],a:pv,cur:cur3});
+      debC[di2][1]-=pv;creC[ci4][1]-=pv;
+      if(debC[di2][1]<=0.01)di2++;
+      if(creC[ci4][1]<=0.01)ci4++;
+    }
   }
-  deb.sort(function(a,b){return a[1]-b[1];});
-  cre.sort(function(a,b){return b[1]-a[1];});
-  while(di<deb.length&&ci<cre.length){
-    pay=Math.min(deb[di][1],cre[ci][1]);
-    if(pay>0)sets.push({f:deb[di][0],t:cre[ci][0],a:pay});
-    deb[di][1]-=pay;cre[ci][1]-=pay;
-    if(deb[di][1]===0)di++;if(cre[ci][1]===0)ci++;
+
+  // 合併同 from→to 的不同幣別
+  var setMap={};
+  for(var ci5=0;ci5<currencies.length;ci5++){
+    var cur5=currencies[ci5];
+    var arr=allSets[cur5]||[];
+    for(i=0;i<arr.length;i++){
+      var key=arr[i].f+'→'+arr[i].t;
+      if(!setMap[key])setMap[key]={f:arr[i].f,t:arr[i].t,items:[]};
+      setMap[key].items.push({a:arr[i].a,cur:cur5});
+    }
   }
-  if(!sets.length){
-    sl2.innerHTML='<div class="empty">'+(expenses.length?'🎉 帳目結清！':'尚無資料')+'</div>';
-    return;
-  }
-  for(i=0;i<sets.length;i++){
-    s=sets[i];fc=gc(s.f);tc=gc(s.t);
+
+  var h2='';
+  var hasAny=false;
+  for(var key in setMap){
+    hasAny=true;
+    var ss=setMap[key];
+    var fc2=gc(ss.f),tc2=gc(ss.t);
+    var amtLines=ss.items.map(function(it){
+      var rate=rateMap[it.cur]||1;
+      var twdEq=it.cur==='TWD'?'':'<span style="font-size:10px;color:var(--ink3);"> ≈ TWD '+Math.round(it.a*rate).toLocaleString()+'</span>';
+      return '<span class="samt" style="font-size:13px;">'+it.cur+' '+fmtA(it.a,it.cur)+twdEq+'</span>';
+    }).join(' ');
     h2+='<div class="setl">'
-      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+fc.bg+';border-color:'+fc.bd+';color:'+fc.tx+';">'+ini(s.f)+'</div>'
-      +'<span style="font-size:13px;font-weight:500;">'+s.f+'</span>'
+      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+fc2.bg+';border-color:'+fc2.bd+';color:'+fc2.tx+';">'+ini(ss.f)+'</div>'
+      +'<span style="font-size:13px;font-weight:500;">'+ss.f+'</span>'
       +'<span style="color:var(--ink3);font-size:12px;">→ 還給</span>'
-      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+tc.bg+';border-color:'+tc.bd+';color:'+tc.tx+';">'+ini(s.t)+'</div>'
-      +'<span style="font-size:13px;font-weight:500;">'+s.t+'</span>'
-      +'<span class="samt">TWD '+s.a.toLocaleString()+'</span></div>';
+      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+tc2.bg+';border-color:'+tc2.bd+';color:'+tc2.tx+';">'+ini(ss.t)+'</div>'
+      +'<span style="font-size:13px;font-weight:500;">'+ss.t+'</span>'
+      +'<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+amtLines+'</div>'
+      +'</div>';
   }
-  sl2.innerHTML=h2;
+  sl2.innerHTML=hasAny?h2:'<div class="empty">🎉 帳目結清！</div>';
 }
 
 // ── INIT ───────────────────────────────────────────
