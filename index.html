@@ -319,10 +319,6 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
           <div class="scard sa"><div class="slb">費用筆數</div><div class="svl" id="scnt">0</div></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="cic" style="background:#E6F1FB;">💱</div><div class="ctt">各幣別花費</div></div>
-          <div id="cur-breakdown"><span style="color:var(--ink3);font-size:12px;">尚無費用</span></div>
-        </div>
-        <div class="card">
           <div class="card-hd"><div class="cic" style="background:#D4EDD8;">💰</div><div class="ctt">每人花費</div></div>
           <div id="psum"><div class="empty">尚無資料</div></div>
         </div>
@@ -778,13 +774,18 @@ function rSum(){
         var curName={'JPY':'日幣','USD':'美金','EUR':'歐元','KRW':'韓幣','VND':'越幣','THB':'泰銖','SGD':'新幣','HKD':'港幣'}[cur2]||cur2;
         curParts.push(curName+' '+fmtA(o2,cur2));
       }
-      var costLine=curParts.length?'總花費 '+curParts.join(' '):'';
-      h+='<div style="padding:10px 0;border-bottom:1px dashed var(--sand3);">'
-        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(costLine?'5':'0')+'px;">'
-        +'<div class="av" style="width:34px;height:34px;font-size:12px;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
+      // 右側顯示各幣別總花費，每幣別一行
+      var costRight='';
+      for(var cj=0;cj<curParts.length;cj++){
+        costRight+='<div style="font-size:14px;font-weight:600;color:var(--ink);text-align:right;">'+curParts[cj]+'</div>';
+      }
+      h+='<div style="padding:12px 0;border-bottom:1px dashed var(--sand3);">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<div class="av" style="width:36px;height:36px;font-size:12px;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
         +'<span style="font-size:15px;font-weight:600;">'+m+'</span></div>'
-        +(costLine?'<div style="font-size:13px;color:var(--ink2);padding-left:42px;">'+costLine+'</div>':'')
-        +'</div>';
+        +'<div>'+(costRight||'<span style="font-size:13px;color:var(--ink3);">無花費</span>')+'</div>'
+        +'</div></div>';
     }
     ps.innerHTML=h;
   }
@@ -846,17 +847,16 @@ function rSum(){
     var ss=setMap[key];
     var fc2=gc(ss.f),tc2=gc(ss.t);
     var amtLines=ss.items.map(function(it){
-      var rate=rateMap[it.cur]||1;
-      var twdEq=it.cur==='TWD'?'':'<span style="font-size:10px;color:var(--ink3);"> ≈ TWD '+Math.round(it.a*rate).toLocaleString()+'</span>';
-      return '<span class="samt" style="font-size:13px;">'+it.cur+' '+fmtA(it.a,it.cur)+twdEq+'</span>';
-    }).join(' ');
+      var curName2={'JPY':'日幣','USD':'美金','EUR':'歐元','KRW':'韓幣','VND':'越幣','THB':'泰銖','SGD':'新幣','HKD':'港幣','TWD':'台幣'}[it.cur]||it.cur;
+      return '<span class="samt" style="font-size:13px;">'+curName2+' '+fmtA(it.a,it.cur)+'</span>';
+    }).join('');
     h2+='<div class="setl">'
       +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+fc2.bg+';border-color:'+fc2.bd+';color:'+fc2.tx+';">'+ini(ss.f)+'</div>'
       +'<span style="font-size:13px;font-weight:500;">'+ss.f+'</span>'
       +'<span style="color:var(--ink3);font-size:12px;">→ 還給</span>'
       +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+tc2.bg+';border-color:'+tc2.bd+';color:'+tc2.tx+';">'+ini(ss.t)+'</div>'
       +'<span style="font-size:13px;font-weight:500;">'+ss.t+'</span>'
-      +'<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+amtLines+'</div>'
+      +'<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">'+amtLines+'</div>'
       +'</div>';
   }
   sl2.innerHTML=hasAny?h2:'<div class="empty">🎉 帳目結清！</div>';
