@@ -720,20 +720,55 @@ function rSum(){
   document.getElementById('stot').textContent='TWD '+Math.round(tot).toLocaleString();
   document.getElementById('scnt').textContent=expenses.length;
 
-  // 每人花費
+  // 每人花費（含各幣別明細）
+  // 建立每人的幣別明細：paidDetail[m][cur] = 已付原幣金額, owedDetail[m][cur] = 應付原幣金額
+  var paidDetail={}, owedDetail={};
+  for(i=0;i<members.length;i++){paidDetail[members[i]]={};owedDetail[members[i]]={};}
+  for(i=0;i<expenses.length;i++){
+    e=expenses[i];
+    var cur=e.cur, amt=e.amt;
+    // 付款人已墊
+    if(!paidDetail[e.payer][cur])paidDetail[e.payer][cur]=0;
+    paidDetail[e.payer][cur]+=amt;
+    // 分攤者應付
+    if((e.sw||[]).length){
+      var sh2=amt/(e.sw||[]).length;
+      for(j=0;j<(e.sw||[]).length;j++){
+        m=e.sw[j];
+        if(!owedDetail[m][cur])owedDetail[m][cur]=0;
+        owedDetail[m][cur]+=sh2;
+      }
+    }
+  }
+  function fmtCurAmt(a,c){
+    var big=['VND','KRW'];
+    return big.indexOf(c)>=0?Math.round(a).toLocaleString():Number(a.toFixed(1)).toLocaleString();
+  }
+  function renderCurDetail(detail){
+    var parts=[];
+    for(var c in detail){if(detail[c]>0)parts.push('<span class="ctag">'+c+'</span> '+fmtCurAmt(detail[c],c));}
+    return parts.join(' <span style="color:var(--ink3);">·</span> ');
+  }
+
   var ps=document.getElementById('psum'),h='',net,badge,c;
   if(!expenses.length){ps.innerHTML='<div class="empty">尚無資料</div>';}
   else{
     for(i=0;i<members.length;i++){
       m=members[i];c=gc(m);net=Math.round((paid[m]||0)-(owed[m]||0));
       badge=net>=0
-        ?'<div style="text-align:right"><div style="font-size:13px;color:#3A7D44;font-weight:600;">+'+net.toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">可收回</div></div>'
-        :'<div style="text-align:right"><div style="font-size:13px;color:#E8633A;font-weight:600;">−'+Math.abs(net).toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">需還款</div></div>';
-      h+='<div class="prow"><div style="display:flex;align-items:center;gap:10px;">'
-        +'<div class="av" style="width:34px;height:34px;font-size:12px;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
-        +'<div><div style="font-size:14px;font-weight:500;">'+m+'</div>'
-        +'<div style="font-size:11px;color:var(--ink3);">實付 '+Math.round(owed[m]||0).toLocaleString()+' · 已墊 '+Math.round(paid[m]||0).toLocaleString()+'</div></div>'
-        +'</div>'+badge+'</div>';
+        ?'<div style="text-align:right"><div style="font-size:13px;color:#3A7D44;font-weight:600;">+TWD '+net.toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">可收回</div></div>'
+        :'<div style="text-align:right"><div style="font-size:13px;color:#E8633A;font-weight:600;">−TWD '+Math.abs(net).toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">需還款</div></div>';
+      var paidLine=renderCurDetail(paidDetail[m]);
+      var owedLine=renderCurDetail(owedDetail[m]);
+      h+='<div class="prow" style="flex-wrap:wrap;gap:6px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">'
+        +'<div class="av" style="width:34px;height:34px;font-size:12px;flex-shrink:0;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
+        +'<div style="min-width:0;">'
+        +'<div style="font-size:14px;font-weight:500;">'+m+'</div>'
+        +(paidLine?'<div style="font-size:11px;color:var(--ink3);margin-top:2px;">已墊：'+paidLine+'</div>':'')
+        +(owedLine?'<div style="font-size:11px;color:var(--ink3);">應付：'+owedLine+'</div>':'')
+        +'<div style="font-size:11px;color:var(--ink3);">≈ 已墊 TWD '+Math.round(paid[m]||0).toLocaleString()+' · 應付 TWD '+Math.round(owed[m]||0).toLocaleString()+'</div>'
+        +'</div></div>'+badge+'</div>';
     }
     ps.innerHTML=h;
   }
