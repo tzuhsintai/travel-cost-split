@@ -423,9 +423,8 @@ window.delHistory=function(code){
   renderHistory();
 };
 
-window.quickEnter=function(code,name){
+window.quickEnter=function(code){
   document.getElementById('trip-code-input').value=code;
-  
   enterTrip();
 };
 
@@ -769,76 +768,80 @@ function rSum(){
         mCurLines+=mc+' '+fmtAmt(mCur[mc],mc)+(j<mCurKeys.length-1?' · ':'');
       }
       badge=net>=0
-        ?'<div style="text-align:right"><div style="font-size:13px;color:#3A7D44;font-weight:600;">+'+net.toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">TWD 可收回</div></div>'
-        :'<div style="text-align:right"><div style="font-size:13px;color:#E8633A;font-weight:600;">−'+Math.abs(net).toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">TWD 需還款</div></div>';
+        ?'<div style="text-align:right"><div style="font-size:11px;color:#3A7D44;font-weight:500;">已結清</div></div>'
+        :'<div style="text-align:right"><div style="font-size:11px;color:#E8633A;font-weight:500;">需結清</div></div>';
       h+='<div class="prow"><div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">'
         +'<div class="av" style="width:34px;height:34px;font-size:12px;flex-shrink:0;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
         +'<div style="min-width:0;flex:1;">'
         +'<div style="font-size:14px;font-weight:500;">'+m+'</div>'
         +'<div style="font-size:11px;color:var(--ink3);word-break:break-all;">'+mCurLines+'</div>'
-        +'<div style="font-size:11px;color:var(--ink3);">≈ TWD '+Math.round(owed[m]||0).toLocaleString()+'</div>'
         +'</div></div>'+badge+'</div>';
     }
     ps.innerHTML=h;
   }
 
-  // 清帳明細（以 TWD 計算最優還款路徑，但同時列出原幣）
-  var sl2=document.getElementById('slist'),bal={},deb=[],cre=[],sets=[],di=0,ci=0,payAmt,s,fc,tc,h2='';
-  for(i=0;i<members.length;i++){
-    m=members[i];
-    bal[m]=Math.round((paid[m]||0)-(owed[m]||0));
-    if(bal[m]<0)deb.push([m,-bal[m]]);
-    else if(bal[m]>0)cre.push([m,bal[m]]);
+  // 清帳明細：每種幣別分開計算債務，分別顯示
+  var sl2=document.getElementById('slist'),h2='';
+
+  // 收集所有幣別
+  var allCurs=[];
+  for(i=0;i<expenses.length;i++){
+    if(allCurs.indexOf(expenses[i].cur)<0)allCurs.push(expenses[i].cur);
   }
-  deb.sort(function(a,b){return a[1]-b[1];});
-  cre.sort(function(a,b){return b[1]-a[1];});
-  while(di<deb.length&&ci<cre.length){
-    payAmt=Math.min(deb[di][1],cre[ci][1]);
-    if(payAmt>0)sets.push({f:deb[di][0],t:cre[ci][0],a:payAmt});
-    deb[di][1]-=payAmt;cre[ci][1]-=payAmt;
-    if(deb[di][1]===0)di++;if(cre[ci][1]===0)ci++;
-  }
-  if(!sets.length){
+
+  if(!allCurs.length){
     sl2.innerHTML='<div class="empty">'+(expenses.length?'🎉 帳目結清！':'尚無資料')+'</div>';
     return;
   }
 
-  // 計算付款人實際持有哪些幣別（已付的幣 → 可以收回該幣）
-  var payerCur={};
-  for(i=0;i<expenses.length;i++){
-    e=expenses[i];
-    if(!payerCur[e.payer])payerCur[e.payer]={};
-    payerCur[e.payer][e.cur]=(payerCur[e.payer][e.cur]||0)+e.amt;
+  var anyDebt=false;
+
+  // 每個幣別分開算
+  for(var ci2=0;ci2<allCurs.length;ci2++){
+    var cur2=allCurs[ci2];
+    var paidC={},owedC={};
+    for(i=0;i<members.length;i++){paidC[members[i]]=0;owedC[members[i]]=0;}
+    for(i=0;i<expenses.length;i++){
+      e=expenses[i];
+      if(e.cur!==cur2)continue;
+      paidC[e.payer]=(paidC[e.payer]||0)+e.amt;
+      if((e.sw||[]).length){
+        var sh2=e.amt/(e.sw||[]).length;
+        for(j=0;j<(e.sw||[]).length;j++){m=e.sw[j];owedC[m]=(owedC[m]||0)+sh2;}
+      }
+    }
+    var balC={},debC=[],creC=[],setsC=[],di2=0,ci3=0,payC;
+    for(i=0;i<members.length;i++){
+      m=members[i];
+      balC[m]=paidC[m]-owedC[m];
+      if(balC[m]<-0.01)debC.push([m,-balC[m]]);
+      else if(balC[m]>0.01)creC.push([m,balC[m]]);
+    }
+    if(!debC.length)continue;
+    anyDebt=true;
+    debC.sort(function(a,b){return a[1]-b[1];});
+    creC.sort(function(a,b){return b[1]-a[1];});
+    di2=0;ci3=0;
+    while(di2<debC.length&&ci3<creC.length){
+      payC=Math.min(debC[di2][1],creC[ci3][1]);
+      if(payC>0.01)setsC.push({f:debC[di2][0],t:creC[ci3][0],a:payC,cur:cur2});
+      debC[di2][1]-=payC;creC[ci3][1]-=payC;
+      if(debC[di2][1]<0.01)di2++;if(creC[ci3][1]<0.01)ci3++;
+    }
+    for(i=0;i<setsC.length;i++){
+      s=setsC[i];fc=gc(s.f);tc=gc(s.t);
+      var displayAmt=fmtAmt(s.a,s.cur);
+      h2+='<div class="setl">'
+        +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+fc.bg+';border-color:'+fc.bd+';color:'+fc.tx+';">'+ini(s.f)+'</div>'
+        +'<span style="font-size:13px;font-weight:500;">'+s.f+'</span>'
+        +'<span style="color:var(--ink3);font-size:12px;">→ 還給</span>'
+        +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+tc.bg+';border-color:'+tc.bd+';color:'+tc.tx+';">'+ini(s.t)+'</div>'
+        +'<span style="font-size:13px;font-weight:500;">'+s.t+'</span>'
+        +'<span class="samt" style="margin-left:auto;">'+s.cur+' '+displayAmt+'</span></div>';
+    }
   }
 
-  for(i=0;i<sets.length;i++){
-    s=sets[i];fc=gc(s.f);tc=gc(s.t);
-    // 找收款人(tc)持有的幣別，顯示建議還款幣別
-    var tCurs=payerCur[s.t]?Object.keys(payerCur[s.t]):[];
-    var curHint='';
-    if(tCurs.length===1){
-      // 只有一種幣，直接換算建議金額
-      var onlyCur=tCurs[0];
-      var opts=document.getElementById('ecur').options;
-      var rate=1;
-      for(j=0;j<opts.length;j++){if(opts[j].value===onlyCur)rate=parseFloat(opts[j].getAttribute('data-r'));}
-      var origAmt=rate>0?s.a/rate:0;
-      curHint='<div style="font-size:11px;color:var(--ink3);margin-top:2px;">建議還 '+onlyCur+' '+getCurName(onlyCur)+' '+fmtAmt(origAmt,onlyCur)+'</div>';
-    } else {
-      curHint='<div style="font-size:11px;color:var(--ink3);margin-top:2px;">≈ TWD '+s.a.toLocaleString()+'</div>';
-    }
-    h2+='<div class="setl">'
-      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+fc.bg+';border-color:'+fc.bd+';color:'+fc.tx+';">'+ini(s.f)+'</div>'
-      +'<span style="font-size:13px;font-weight:500;">'+s.f+'</span>'
-      +'<span style="color:var(--ink3);font-size:12px;">→ 還給</span>'
-      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+tc.bg+';border-color:'+tc.bd+';color:'+tc.tx+';">'+ini(s.t)+'</div>'
-      +'<div style="flex:1;">'
-      +'<span style="font-size:13px;font-weight:500;">'+s.t+'</span>'
-      +curHint
-      +'</div>'
-      +'<span class="samt">TWD '+s.a.toLocaleString()+'</span></div>';
-  }
-  sl2.innerHTML=h2;
+  sl2.innerHTML=anyDebt?h2:'<div class="empty">'+(expenses.length?'🎉 帳目結清！':'尚無資料')+'</div>';
 }
 
 // ── INIT ───────────────────────────────────────────
