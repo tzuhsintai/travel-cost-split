@@ -763,48 +763,28 @@ function rSum(){
     for(i=0;i<members.length;i++){
       m=members[i];
       var c=gc(m);
-      var netTwd=Math.round((paidTwd[m]||0)-(owedTwd[m]||0));
-      var netSign=netTwd>=0;
-      // 建立幣別行
-      var rows='';
-      // TWD 合計行
-      rows+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid #eee;">'
-        +'<span style="font-size:11px;color:var(--ink3);">已墊 / 應付（TWD 合計）</span>'
-        +'<span style="font-size:12px;color:var(--ink2);">已墊 TWD '+Math.round(paidTwd[m]).toLocaleString()+' / 應付 TWD '+Math.round(owedTwd[m]).toLocaleString()+'</span></div>';
-      // 各幣別明細
+      // 各幣別個人花費（應付金額），格式：總花費 台幣xxx 新幣xxx
+      var curParts=[];
+      // TWD 先
+      if((owedByCur[m]['TWD']||0)>0){
+        curParts.push('台幣 '+fmtA(owedByCur[m]['TWD'],'TWD'));
+      }
+      // 其他外幣
       for(var ci2=0;ci2<currencies.length;ci2++){
         var cur2=currencies[ci2];
-        var p2=paidByCur[m][cur2]||0;
+        if(cur2==='TWD')continue;
         var o2=owedByCur[m][cur2]||0;
-        if(p2<=0&&o2<=0)continue;
-        var rate2=rateMap[cur2]||1;
-        var line='';
-        if(p2>0)line+='已墊 '+cur2+' '+fmtA(p2,cur2);
-        if(p2>0&&o2>0)line+='　';
-        if(o2>0)line+='應付 '+cur2+' '+fmtA(o2,cur2);
-        if(cur2!=='TWD'){
-          var twdNote='';
-          if(p2>0)twdNote+='≈ TWD '+Math.round(p2*rate2).toLocaleString();
-          if(p2>0&&o2>0)twdNote+=' / ';
-          if(o2>0)twdNote+=(p2>0?'':'≈ TWD ')+Math.round(o2*rate2).toLocaleString();
-          rows+='<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:0.5px solid #f0ebe0;">'
-            +'<span style="font-size:12px;color:var(--ink3);">'+line+'</span>'
-            +'<span style="font-size:11px;color:var(--ink3);">'+twdNote+'</span></div>';
-        } else {
-          rows+='<div style="padding:3px 0;border-bottom:0.5px solid #f0ebe0;font-size:12px;color:var(--ink3);">'+line+'</div>';
-        }
+        if(o2<=0)continue;
+        var curName={'JPY':'日幣','USD':'美金','EUR':'歐元','KRW':'韓幣','VND':'越幣','THB':'泰銖','SGD':'新幣','HKD':'港幣'}[cur2]||cur2;
+        curParts.push(curName+' '+fmtA(o2,cur2));
       }
+      var costLine=curParts.length?'總花費 '+curParts.join(' '):'';
       h+='<div style="padding:10px 0;border-bottom:1px dashed var(--sand3);">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(costLine?'5':'0')+'px;">'
         +'<div class="av" style="width:34px;height:34px;font-size:12px;background:'+c.bg+';border-color:'+c.bd+';color:'+c.tx+';">'+ini(m)+'</div>'
         +'<span style="font-size:15px;font-weight:600;">'+m+'</span></div>'
-        +'<div style="text-align:right;">'
-        +(netSign
-          ?'<div style="font-size:13px;color:#3A7D44;font-weight:600;">+TWD '+netTwd.toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">可收回</div>'
-          :'<div style="font-size:13px;color:#E8633A;font-weight:600;">−TWD '+Math.abs(netTwd).toLocaleString()+'</div><div style="font-size:10px;color:var(--ink3);">需還款</div>')
-        +'</div></div>'
-        +rows+'</div>';
+        +(costLine?'<div style="font-size:13px;color:var(--ink2);padding-left:42px;">'+costLine+'</div>':'')
+        +'</div>';
     }
     ps.innerHTML=h;
   }
