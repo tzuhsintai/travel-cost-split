@@ -319,6 +319,11 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
           <div class="scard sa"><div class="slb">費用筆數</div><div class="svl" id="scnt">0</div></div>
         </div>
         <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#E6F1FB;">📊</div><div class="ctt">消費類別統計</div></div>
+          <div id="cat-chart-wrap" style="display:none;"><canvas id="cat-chart" height="220"></canvas></div>
+          <div id="cat-chart-empty" class="empty">尚無費用資料</div>
+        </div>
+        <div class="card">
           <div class="card-hd"><div class="cic" style="background:#D4EDD8;">💰</div><div class="ctt">每人花費</div></div>
           <div id="psum"><div class="empty">尚無資料</div></div>
         </div>
@@ -407,9 +412,9 @@ function renderHistory(){
   if(!h.length){card.style.display='none';return;}
   card.style.display='block';
   el.innerHTML=h.map(function(x){
-    return '<div class="trip-item" onclick="quickEnter(\''+x.code+'\',\''+x.name+'\')">'
-      +'<div><div class="trip-item-name">'+x.name+'</div><div class="trip-item-code">代碼：'+x.code+'</div></div>'
-      +'<div class="trip-item-arrow">›</div></div>';
+    return '<div class="trip-item" style="cursor:default;">'
+      +'<div style="flex:1;cursor:pointer;" onclick="quickEnter(\''+x.code+'\')"><div class="trip-item-name">'+x.name+'</div><div class="trip-item-code">代碼：'+x.code+'</div></div>'
+      +'<button onclick="delHistory(\''+x.code+'\')" style="background:none;border:none;font-size:20px;color:#bbb;cursor:pointer;padding:0 6px;line-height:1;">×</button></div>';
   }).join('');
 }
 
@@ -860,10 +865,58 @@ function rSum(){
       +'</div>';
   }
   sl2.innerHTML=hasAny?h2:'<div class="empty">🎉 帳目結清！</div>';
+  renderCatChart();
+}
+
+// ── 消費類別統計圖 ─────────────────────────────────
+var catChartInstance=null;
+function renderCatChart(){
+  var wrap=document.getElementById('cat-chart-wrap');
+  var empty=document.getElementById('cat-chart-empty');
+  if(!expenses.length){
+    if(wrap)wrap.style.display='none';
+    if(empty)empty.style.display='block';
+    if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
+    return;
+  }
+  // 按類別匯總（全部換算成TWD）
+  var catMap={};
+  var catNames={'🍜':'餐飲','🏨':'住宿','🚆':'交通','🎡':'娛樂','🛍️':'購物','💊':'其他'};
+  for(var i=0;i<expenses.length;i++){
+    var cat=expenses[i].cat;
+    var label=catNames[cat]||cat;
+    catMap[label]=(catMap[label]||0)+expenses[i].twd;
+  }
+  var labels=Object.keys(catMap);
+  var data=labels.map(function(k){return Math.round(catMap[k]);});
+  var colors=['#2A6B7C','#E8633A','#3A7D44','#BA7517','#6A4A8A','#8A7A5A'];
+  if(wrap)wrap.style.display='block';
+  if(empty)empty.style.display='none';
+  var canvas=document.getElementById('cat-chart');
+  if(!canvas)return;
+  if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
+  catChartInstance=new Chart(canvas,{
+    type:'doughnut',
+    data:{
+      labels:labels,
+      datasets:[{data:data,backgroundColor:colors.slice(0,labels.length),borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:13},padding:12}},
+        tooltip:{callbacks:{label:function(ctx){
+          var pct=Math.round(ctx.parsed/data.reduce(function(a,b){return a+b;},0)*100);
+          return ' TWD '+ctx.parsed.toLocaleString()+' ('+pct+'%)';
+        }}}
+      }
+    }
+  });
 }
 
 // ── INIT ───────────────────────────────────────────
 renderHistory();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </body>
 </html>
