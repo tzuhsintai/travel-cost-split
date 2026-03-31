@@ -200,13 +200,17 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
     <div class="landing-card">
       <h2>加入 / 建立行程</h2>
       <div class="fmb">
-        <label>行程代碼（自訂英數字，例如 vietnam2025）</label>
-        <input type="text" id="trip-code-input" placeholder="輸入行程代碼" autocapitalize="none"/>
+        <label>行程代碼（英數字，例如 vietnam2025）</label>
+        <input type="text" id="trip-code-input" placeholder="輸入行程代碼" autocapitalize="none" onkeydown="if(event.key==='Enter')enterTrip()"/>
       </div>
       <button class="btn" onclick="enterTrip()">進入行程 →</button>
     </div>
+    <div class="landing-card" id="pinned-card" style="display:none;">
+      <h2>📌 置頂行程</h2>
+      <div id="pinned-list"></div>
+    </div>
     <div class="landing-card" id="history-card" style="display:none;">
-      <h2>最近使用的行程</h2>
+      <h2>🛂 歷史行程（本機紀錄）</h2>
       <div class="trip-history" id="trip-history"></div>
     </div>
   </div>
@@ -227,6 +231,7 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
         <div class="trip-badge">🗺️ <span id="tndis">—</span></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="sync-info"><span class="dot" id="syncDot"></span><span id="syncLabel">連線中</span></div>
+          <button id="pin-btn" onclick="togglePinCurrent()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,0.9);cursor:pointer;font-family:-apple-system,sans-serif;">📌 置頂</button>
           <button onclick="leaveTrip()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,0.9);cursor:pointer;font-family:-apple-system,sans-serif;">切換行程</button>
         </div>
       </div>
@@ -400,32 +405,71 @@ function setSyncStatus(ok){
   if(lbl)lbl.textContent=ok?'已同步':'未連線';
 }
 
-// ── HISTORY ────────────────────────────────────────
+// ── HISTORY & PINNED (本機 localStorage only) ──────
+var PINNED_KEY='trip_pinned';
+
 function getHistory(){
   try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return [];}
 }
 function saveHistory(code,name){
   var h=getHistory().filter(function(x){return x.code!==code;});
   h.unshift({code:code,name:name||code});
-  if(h.length>5)h=h.slice(0,5);
+  if(h.length>20)h=h.slice(0,20);
   localStorage.setItem(HISTORY_KEY,JSON.stringify(h));
+}
+function getPinned(){
+  try{return JSON.parse(localStorage.getItem(PINNED_KEY)||'[]');}catch(e){return [];}
+}
+function isPinned(code){return getPinned().indexOf(code)>=0;}
+function togglePin(code){
+  var p=getPinned();
+  var idx=p.indexOf(code);
+  if(idx>=0)p.splice(idx,1);
+  else p.unshift(code);
+  localStorage.setItem(PINNED_KEY,JSON.stringify(p));
+  renderHistory();
+}
+function tripItemHTML(x){
+  var sc=x.code;
+  var pinIcon=isPinned(sc)?'📌':'☆';
+  var pinTitle=isPinned(sc)?'取消置頂':'置頂';
+  return '<div class="trip-item" style="cursor:default;">'
+    +'<div style="flex:1;cursor:pointer;" onclick="quickEnter(\''+sc+'\')">'
+    +'<div class="trip-item-name">'+x.name+'</div>'
+    +'<div class="trip-item-code">代碼：'+sc+'</div></div>'
+    +'<button onclick="event.stopPropagation();togglePin(\''+sc+'\')" title="'+pinTitle+'" '
+    +'style="background:none;border:none;font-size:16px;cursor:pointer;padding:0 4px;opacity:'+(isPinned(sc)?'1':'0.35')+';">📌</button>'
+    +'<button onclick="event.stopPropagation();delHistory(\''+sc+'\')" '
+    +'style="background:none;border:none;font-size:20px;color:#bbb;cursor:pointer;padding:0 4px;line-height:1;">×</button>'
+    +'</div>';
 }
 function renderHistory(){
   var h=getHistory();
+  var pinned=getPinned();
+  // 置頂
+  var pc=document.getElementById('pinned-card');
+  var pl=document.getElementById('pinned-list');
+  if(pc&&pl){
+    var pinnedItems=pinned.map(function(code){
+      var found=h.find(function(x){return x.code===code;});
+      return found||{code:code,name:code};
+    }).filter(function(x){return x;});
+    if(pinnedItems.length){pc.style.display='block';pl.innerHTML=pinnedItems.map(tripItemHTML).join('');}
+    else{pc.style.display='none';}
+  }
+  // 歷史
   var card=document.getElementById('history-card');
   var el=document.getElementById('trip-history');
-  if(!h.length){card.style.display='none';return;}
-  card.style.display='block';
-  el.innerHTML=h.map(function(x){
-    return '<div class="trip-item" style="cursor:default;">'
-      +'<div style="flex:1;cursor:pointer;" onclick="quickEnter(\''+x.code+'\')"><div class="trip-item-name">'+x.name+'</div><div class="trip-item-code">代碼：'+x.code+'</div></div>'
-      +'<button onclick="delHistory(\''+x.code+'\')" style="background:none;border:none;font-size:20px;color:#bbb;cursor:pointer;padding:0 6px;line-height:1;">×</button></div>';
-  }).join('');
+  if(!h.length){if(card)card.style.display='none';return;}
+  if(card)card.style.display='block';
+  el.innerHTML=h.map(tripItemHTML).join('');
 }
 
 window.delHistory=function(code){
   var h=getHistory().filter(function(x){return x.code!==code;});
   localStorage.setItem(HISTORY_KEY,JSON.stringify(h));
+  var p=getPinned().filter(function(c){return c!==code;});
+  localStorage.setItem(PINNED_KEY,JSON.stringify(p));
   renderHistory();
 };
 
@@ -436,14 +480,23 @@ window.quickEnter=function(code){
 
 window.enterTrip=function(){
   var code=document.getElementById('trip-code-input').value.trim().toLowerCase().replace(/\s+/g,'');
-  var name='';
   if(!code){toast('請輸入行程代碼');return;}
   currentTripCode=code;
   ROOT=ref(db,'trips/'+code);
   document.getElementById('landing-page').style.display='none';
   document.getElementById('main-app').style.display='block';
   document.getElementById('hero-sub').textContent='行程代碼：'+code;
-  startListening(name);
+  var pinBtn=document.getElementById('pin-btn');
+  if(pinBtn)pinBtn.textContent=isPinned(code)?'📌 已置頂':'📌 置頂';
+  startListening('');
+};
+};
+
+window.togglePinCurrent=function(){
+  if(!currentTripCode)return;
+  togglePin(currentTripCode);
+  var btn=document.getElementById('pin-btn');
+  if(btn)btn.textContent=isPinned(currentTripCode)?'📌 已置頂':'📌 置頂';
 };
 
 window.leaveTrip=function(){
@@ -926,10 +979,8 @@ function renderCatChart(){
       // sw 從 Firebase 取回可能是 object，統一轉成 array
       var swRaw=e.sw||[];
       var sw=Array.isArray(swRaw)?swRaw:Object.values(swRaw);
-      var inSplit=false;
-      for(var j=0;j<sw.length;j++){
-        if(String(sw[j])===String(filterMember)){inSplit=true;break;}
-      }
+      var swStrings=sw.map(function(v){return String(v);});
+      var inSplit=swStrings.indexOf(String(filterMember))>=0;
       if(inSplit&&sw.length>0){
         var personalShare=e.twd/sw.length;
         catMap[label]=(catMap[label]||0)+personalShare;
