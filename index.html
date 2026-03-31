@@ -319,13 +319,18 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
           <div class="scard sa"><div class="slb">費用筆數</div><div class="svl" id="scnt">0</div></div>
         </div>
         <div class="card">
-          <div class="card-hd"><div class="cic" style="background:#E6F1FB;">📊</div><div class="ctt">消費類別統計</div></div>
-          <div id="cat-chart-wrap" style="display:none;"><canvas id="cat-chart" height="220"></canvas></div>
-          <div id="cat-chart-empty" class="empty">尚無費用資料</div>
-        </div>
-        <div class="card">
           <div class="card-hd"><div class="cic" style="background:#D4EDD8;">💰</div><div class="ctt">每人花費</div></div>
           <div id="psum"><div class="empty">尚無資料</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="cic" style="background:#E6F1FB;">📊</div><div class="ctt">消費類別統計</div></div>
+          <div style="margin-bottom:10px;">
+            <select id="cat-filter" onchange="renderCatChart()" style="font-size:14px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--sand3);background:var(--sand);color:var(--ink);width:100%;-webkit-appearance:none;">
+              <option value="__all__">全體總花費</option>
+            </select>
+          </div>
+          <div id="cat-chart-wrap" style="display:none;"><canvas id="cat-chart" height="220"></canvas></div>
+          <div id="cat-chart-empty" class="empty">尚無費用資料</div>
         </div>
         <div class="card">
           <div class="card-hd"><div class="cic" style="background:#F5C4B0;">🤝</div><div class="ctt">清帳明細</div></div>
@@ -865,36 +870,85 @@ function rSum(){
       +'</div>';
   }
   sl2.innerHTML=hasAny?h2:'<div class="empty">🎉 帳目結清！</div>';
+  updateCatFilterOptions();
   renderCatChart();
 }
 
 // ── 消費類別統計圖 ─────────────────────────────────
 var catChartInstance=null;
+
+function updateCatFilterOptions(){
+  var sel=document.getElementById('cat-filter');
+  if(!sel)return;
+  var cur=sel.value;
+  var opts='<option value="__all__">全體總花費</option>';
+  for(var i=0;i<members.length;i++){
+    opts+='<option value="'+members[i]+'">'+members[i]+'的花費</option>';
+  }
+  sel.innerHTML=opts;
+  // restore selection if still valid
+  var found=false;
+  for(var j=0;j<sel.options.length;j++){if(sel.options[j].value===cur){sel.value=cur;found=true;break;}}
+  if(!found)sel.value='__all__';
+}
+
 function renderCatChart(){
   var wrap=document.getElementById('cat-chart-wrap');
   var empty=document.getElementById('cat-chart-empty');
+  var sel=document.getElementById('cat-filter');
+  var filterMember=sel?sel.value:'__all__';
+
   if(!expenses.length){
     if(wrap)wrap.style.display='none';
     if(empty)empty.style.display='block';
     if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
     return;
   }
-  // 按類別匯總（全部換算成TWD）
-  var catMap={};
+
   var catNames={'🍜':'餐飲','🏨':'住宿','🚆':'交通','🎡':'娛樂','🛍️':'購物','💊':'其他'};
+  var catMap={};
+
   for(var i=0;i<expenses.length;i++){
-    var cat=expenses[i].cat;
-    var label=catNames[cat]||cat;
-    catMap[label]=(catMap[label]||0)+expenses[i].twd;
+    var e=expenses[i];
+    var label=catNames[e.cat]||e.cat;
+    if(filterMember==='__all__'){
+      // 全體：用每人分攤金額加總（每人應付份額）
+      if((e.sw||[]).length){
+        var share=e.twd/(e.sw||[]).length;
+        catMap[label]=(catMap[label]||0)+e.twd;
+      } else {
+        catMap[label]=(catMap[label]||0)+e.twd;
+      }
+    } else {
+      // 個人：只算這個人分攤到的份額
+      var sw=e.sw||[];
+      var inSplit=false;
+      for(var j=0;j<sw.length;j++){if(sw[j]===filterMember){inSplit=true;break;}}
+      if(inSplit){
+        var personalShare=e.twd/sw.length;
+        catMap[label]=(catMap[label]||0)+personalShare;
+      }
+    }
   }
+
   var labels=Object.keys(catMap);
   var data=labels.map(function(k){return Math.round(catMap[k]);});
+  var total=data.reduce(function(a,b){return a+b;},0);
   var colors=['#2A6B7C','#E8633A','#3A7D44','#BA7517','#6A4A8A','#8A7A5A'];
+
+  if(!total){
+    if(wrap)wrap.style.display='none';
+    if(empty)empty.style.display='block';
+    if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
+    return;
+  }
+
   if(wrap)wrap.style.display='block';
   if(empty)empty.style.display='none';
   var canvas=document.getElementById('cat-chart');
   if(!canvas)return;
   if(catChartInstance){catChartInstance.destroy();catChartInstance=null;}
+  var tot=total;
   catChartInstance=new Chart(canvas,{
     type:'doughnut',
     data:{
@@ -906,7 +960,7 @@ function renderCatChart(){
       plugins:{
         legend:{position:'bottom',labels:{font:{size:13},padding:12}},
         tooltip:{callbacks:{label:function(ctx){
-          var pct=Math.round(ctx.parsed/data.reduce(function(a,b){return a+b;},0)*100);
+          var pct=Math.round(ctx.parsed/tot*100);
           return ' TWD '+ctx.parsed.toLocaleString()+' ('+pct+'%)';
         }}}
       }
