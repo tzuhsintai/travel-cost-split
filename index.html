@@ -774,10 +774,10 @@ function rSum(){
         var curName={'JPY':'日幣','USD':'美金','EUR':'歐元','KRW':'韓幣','VND':'越幣','THB':'泰銖','SGD':'新幣','HKD':'港幣'}[cur2]||cur2;
         curParts.push(curName+' '+fmtA(o2,cur2));
       }
-      // 右側顯示各幣別總花費，每幣別一行
+      // 右側顯示各幣別總花費，每幣別一行（同清帳明細 .samt 樣式）
       var costRight='';
       for(var cj=0;cj<curParts.length;cj++){
-        costRight+='<div style="font-size:14px;font-weight:600;color:var(--ink);text-align:right;">'+curParts[cj]+'</div>';
+        costRight+='<div style="text-align:right;margin-bottom:4px;"><span class="samt" style="font-size:13px;">'+curParts[cj]+'</span></div>';
       }
       h+='<div style="padding:12px 0;border-bottom:1px dashed var(--sand3);">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
@@ -851,11 +851,11 @@ function rSum(){
       return '<span class="samt" style="font-size:13px;">'+curName2+' '+fmtA(it.a,it.cur)+'</span>';
     }).join('');
     h2+='<div class="setl">'
-      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+fc2.bg+';border-color:'+fc2.bd+';color:'+fc2.tx+';">'+ini(ss.f)+'</div>'
-      +'<span style="font-size:13px;font-weight:500;">'+ss.f+'</span>'
+      +'<div class="av" style="width:36px;height:36px;font-size:12px;background:'+fc2.bg+';border-color:'+fc2.bd+';color:'+fc2.tx+';">'+ini(ss.f)+'</div>'
+      +'<span style="font-size:15px;font-weight:600;">'+ss.f+'</span>'
       +'<span style="color:var(--ink3);font-size:12px;">→ 還給</span>'
-      +'<div class="av" style="width:28px;height:28px;font-size:10px;background:'+tc2.bg+';border-color:'+tc2.bd+';color:'+tc2.tx+';">'+ini(ss.t)+'</div>'
-      +'<span style="font-size:13px;font-weight:500;">'+ss.t+'</span>'
+      +'<div class="av" style="width:36px;height:36px;font-size:12px;background:'+tc2.bg+';border-color:'+tc2.bd+';color:'+tc2.tx+';">'+ini(ss.t)+'</div>'
+      +'<span style="font-size:15px;font-weight:600;">'+ss.t+'</span>'
       +'<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">'+amtLines+'</div>'
       +'</div>';
   }
