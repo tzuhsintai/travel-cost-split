@@ -577,7 +577,7 @@ window.confirmDelMem=function(){
   var n=members[pendingDelMemIdx];
   members.splice(pendingDelMemIdx,1);
   expenses=expenses.map(function(e){
-    return Object.assign({},e,{sw:(e.sw||[]).filter(function(x){return x!==n;})});
+    return Object.assign({},e,{sw:toArr(e.sw).filter(function(x){return x!==n;})});
   });
   closeDelMem();
   rMem();rPayer();rSplit();rExp();persist();toast('已刪除 '+n);
@@ -691,7 +691,7 @@ function rExp(){
   if(!expenses.length){el.innerHTML='<div class="empty">尚無費用記錄</div>';return;}
   for(i=expenses.length-1;i>=0;i--){
     e=expenses[i];c=gc(e.payer);
-    sl=(e.sw||[]).length===members.length?'所有人':(e.sw||[]).join('、');
+    sl=toArr(e.sw).length===members.length?'所有人':toArr(e.sw).join('、');
     am=(e.cur==='VND'||e.cur==='KRW')?Math.round(e.amt).toLocaleString():Number(e.amt).toLocaleString();
     h+='<div class="eitem"><div class="eic" style="background:'+c.bg+';">'+e.cat+'</div>'
       +'<div class="einf"><div class="ett">'+e.desc+'</div>'
@@ -704,6 +704,8 @@ function rExp(){
 }
 
 // ── 結算 ───────────────────────────────────────────
+function toArr(v){return Array.isArray(v)?v:(v?Object.values(v):[]);}
+
 function rSum(){
   if(!members.length)return;
   var i,e,m,j;
@@ -731,10 +733,10 @@ function rSum(){
       paidByCur[e.payer][e.cur]=(paidByCur[e.payer][e.cur]||0)+e.amt;
       paidTwd[e.payer]=(paidTwd[e.payer]||0)+e.twd;
     }
-    if((e.sw||[]).length){
-      var shAmt=e.amt/(e.sw||[]).length;
-      var shTwd=e.twd/(e.sw||[]).length;
-      for(j=0;j<(e.sw||[]).length;j++){
+    if(toArr(e.sw).length){
+      var shAmt=e.amt/toArr(e.sw).length;
+      var shTwd=e.twd/toArr(e.sw).length;
+      for(j=0;j<toArr(e.sw).length;j++){
         m=e.sw[j];
         if(owedByCur[m]){
           owedByCur[m][e.cur]=(owedByCur[m][e.cur]||0)+shAmt;
@@ -814,9 +816,9 @@ function rSum(){
       e=expenses[i];
       if(e.cur!==cur3)continue;
       balC[e.payer]=(balC[e.payer]||0)+e.amt;
-      if((e.sw||[]).length){
-        var sc=e.amt/(e.sw||[]).length;
-        for(j=0;j<(e.sw||[]).length;j++)balC[e.sw[j]]=(balC[e.sw[j]]||0)-sc;
+      if(toArr(e.sw).length){
+        var sc=e.amt/toArr(e.sw).length;
+        for(j=0;j<toArr(e.sw).length;j++)balC[e.sw[j]]=(balC[e.sw[j]]||0)-sc;
       }
     }
     var debC=[],creC=[];
@@ -913,18 +915,22 @@ function renderCatChart(){
     var label=catNames[e.cat]||e.cat;
     if(filterMember==='__all__'){
       // 全體：用每人分攤金額加總（每人應付份額）
-      if((e.sw||[]).length){
-        var share=e.twd/(e.sw||[]).length;
+      if(toArr(e.sw).length){
+        var share=e.twd/toArr(e.sw).length;
         catMap[label]=(catMap[label]||0)+e.twd;
       } else {
         catMap[label]=(catMap[label]||0)+e.twd;
       }
     } else {
       // 個人：只算這個人分攤到的份額
-      var sw=e.sw||[];
+      // sw 從 Firebase 取回可能是 object，統一轉成 array
+      var swRaw=e.sw||[];
+      var sw=Array.isArray(swRaw)?swRaw:Object.values(swRaw);
       var inSplit=false;
-      for(var j=0;j<sw.length;j++){if(sw[j]===filterMember){inSplit=true;break;}}
-      if(inSplit){
+      for(var j=0;j<sw.length;j++){
+        if(String(sw[j])===String(filterMember)){inSplit=true;break;}
+      }
+      if(inSplit&&sw.length>0){
         var personalShare=e.twd/sw.length;
         catMap[label]=(catMap[label]||0)+personalShare;
       }
