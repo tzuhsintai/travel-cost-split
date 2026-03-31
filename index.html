@@ -210,7 +210,7 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
       <div id="pinned-list"></div>
     </div>
     <div class="landing-card" id="history-card" style="display:none;">
-      <h2>🛂 歷史行程（本機紀錄）</h2>
+      <h2>🛂 歷史行程</h2>
       <div class="trip-history" id="trip-history"></div>
     </div>
   </div>
@@ -330,7 +330,7 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
         <div class="card">
           <div class="card-hd"><div class="cic" style="background:#E6F1FB;">📊</div><div class="ctt">消費類別統計</div></div>
           <div style="margin-bottom:10px;">
-            <select id="cat-filter" onchange="renderCatChart()" style="font-size:14px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--sand3);background:var(--sand);color:var(--ink);width:100%;-webkit-appearance:none;">
+            <select id="cat-filter" style="font-size:14px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--sand3);background:var(--sand);color:var(--ink);width:100%;-webkit-appearance:none;">
               <option value="__all__">全體總花費</option>
             </select>
           </div>
@@ -931,7 +931,7 @@ function rSum(){
 // ── 消費類別統計圖 ─────────────────────────────────
 var catChartInstance=null;
 
-function updateCatFilterOptions(){
+window.updateCatFilterOptions=function updateCatFilterOptions(){
   var sel=document.getElementById('cat-filter');
   if(!sel)return;
   var cur=sel.value;
@@ -946,7 +946,7 @@ function updateCatFilterOptions(){
   if(!found)sel.value='__all__';
 }
 
-function renderCatChart(){
+window.renderCatChart=function renderCatChart(){
   var wrap=document.getElementById('cat-chart-wrap');
   var empty=document.getElementById('cat-chart-empty');
   var sel=document.getElementById('cat-filter');
@@ -974,15 +974,14 @@ function renderCatChart(){
         catMap[label]=(catMap[label]||0)+e.twd;
       }
     } else {
-      // 個人：只算這個人分攤到的份額
-      // sw 從 Firebase 取回可能是 object，統一轉成 array
-      var swRaw=e.sw||[];
-      var sw=Array.isArray(swRaw)?swRaw:Object.values(swRaw);
-      var swStrings=sw.map(function(v){return String(v);});
-      var inSplit=swStrings.indexOf(String(filterMember))>=0;
-      if(inSplit&&sw.length>0){
-        var personalShare=e.twd/sw.length;
-        catMap[label]=(catMap[label]||0)+personalShare;
+      // 個人：只算這個人有在 sw 名單內的費用份額
+      var sw2=toArr(e.sw);
+      var found=false;
+      for(var k=0;k<sw2.length;k++){
+        if(String(sw2[k]).trim()===String(filterMember).trim()){found=true;break;}
+      }
+      if(found && sw2.length>0){
+        catMap[label]=(catMap[label]||0)+(e.twd/sw2.length);
       }
     }
   }
@@ -1025,6 +1024,10 @@ function renderCatChart(){
 }
 
 // ── INIT ───────────────────────────────────────────
+// 綁定圖表選單（module 內函式不是全域，用 addEventListener）
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id === 'cat-filter') renderCatChart();
+});
 renderHistory();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
