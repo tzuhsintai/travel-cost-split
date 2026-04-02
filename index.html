@@ -189,6 +189,44 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
   </div>
 </div>
 
+<!-- 設定入群暗號（建立新行程時） -->
+<div class="overlay" id="set-pw-overlay">
+  <div class="modal">
+    <div class="modal-title">建立行程暗號</div>
+    <div class="modal-sub">設定一組暗號，朋友輸入後才能加入此行程</div>
+    <input class="modal-input" type="text" id="set-pw-input" placeholder="自訂暗號（英數字皆可）" autocapitalize="none"/>
+    <div class="modal-row">
+      <button class="modal-btn cancel" onclick="cancelSetPw()">取消</button>
+      <button class="modal-btn confirm" onclick="confirmSetPw()">建立行程</button>
+    </div>
+  </div>
+</div>
+
+<!-- 輸入入群暗號（加入已存在的行程） -->
+<div class="overlay" id="join-pw-overlay">
+  <div class="modal">
+    <div class="modal-title">輸入入群暗號</div>
+    <div class="modal-sub" id="join-pw-sub">請輸入此行程的暗號</div>
+    <input class="modal-input" type="text" id="join-pw-input" placeholder="輸入暗號" autocapitalize="none" onkeydown="if(event.key==='Enter')confirmJoinPw()"/>
+    <div class="modal-row">
+      <button class="modal-btn cancel" onclick="cancelJoinPw()">取消</button>
+      <button class="modal-btn confirm" onclick="confirmJoinPw()">確認加入</button>
+    </div>
+  </div>
+</div>
+
+<!-- 顯示暗號 -->
+<div class="overlay" id="show-pw-overlay">
+  <div class="modal">
+    <div class="modal-title">入群暗號</div>
+    <div id="show-pw-content" style="font-size:28px;font-weight:700;text-align:center;padding:16px 0;letter-spacing:4px;color:var(--ocean2);"></div>
+    <div class="modal-sub" style="text-align:center;">把這組暗號告訴你的旅伴</div>
+    <div style="margin-top:14px;">
+      <button class="modal-btn confirm" style="width:100%;" onclick="document.getElementById('show-pw-overlay').className='overlay'">關閉</button>
+    </div>
+  </div>
+</div>
+
 <!-- 行程選擇頁 -->
 <div id="landing-page">
   <div class="landing">
@@ -250,6 +288,7 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
             </div>
           </div>
           <button class="btn" id="save-name-btn" onclick="saveTripName()" style="display:none;">儲存名稱</button>
+          <button class="btn" id="show-pw-btn" onclick="showGroupPw()" style="display:none;margin-top:8px;background:var(--ink3);">🔑 顯示入群暗號</button>
         </div>
         <div class="card">
           <div class="card-hd"><div class="cic" style="background:#D4EDD8;">👥</div><div class="ctt">旅伴名單</div></div>
@@ -478,9 +517,16 @@ window.quickEnter=function(code){
   enterTrip();
 };
 
-window.enterTrip=function(){
-  var code=document.getElementById('trip-code-input').value.trim().toLowerCase().replace(/\s+/g,'');
-  if(!code){toast('請輸入行程代碼');return;}
+// 取得本機 auth 紀錄
+function getAuth(code){
+  try{return JSON.parse(localStorage.getItem('auth_'+code)||'null');}catch(e){return null;}
+}
+function setAuth(code,role){
+  localStorage.setItem('auth_'+code,JSON.stringify({role:role}));
+}
+
+// 進入 app 畫面
+function goToApp(code){
   currentTripCode=code;
   ROOT=ref(db,'trips/'+code);
   document.getElementById('landing-page').style.display='none';
@@ -488,7 +534,97 @@ window.enterTrip=function(){
   document.getElementById('hero-sub').textContent='行程代碼：'+code;
   var pinBtn=document.getElementById('pin-btn');
   if(pinBtn)pinBtn.textContent=isPinned(code)?'📌 已置頂':'📌 置頂';
+  // 顯示/隱藏暗號按鈕
+  var auth=getAuth(code);
+  var showPwBtn=document.getElementById('show-pw-btn');
+  if(showPwBtn)showPwBtn.style.display=(auth&&auth.role==='admin')?'block':'none';
   startListening('');
+}
+
+var pendingCode='';  // 暫存代碼，等待 modal 操作
+
+window.enterTrip=function(){
+  var code=document.getElementById('trip-code-input').value.trim().toLowerCase().replace(/\s+/g,'');
+  if(!code){toast('請輸入行程代碼');return;}
+
+  // 先查本機是否已認證
+  var auth=getAuth(code);
+  if(auth&&(auth.role==='admin'||auth.role==='member')){
+    goToApp(code);
+    return;
+  }
+
+  // 查 Firebase 是否已有這個 group
+  pendingCode=code;
+  var groupRef=ref(db,'groups/'+code);
+  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
+    m.get(groupRef).then(function(snap){
+      if(!snap.exists()){
+        // 新行程 → 要求設定暗號
+        document.getElementById('set-pw-input').value='';
+        document.getElementById('set-pw-overlay').className='overlay show';
+        setTimeout(function(){document.getElementById('set-pw-input').focus();},100);
+      } else {
+        // 已存在 → 要求輸入暗號加入
+        document.getElementById('join-pw-input').value='';
+        document.getElementById('join-pw-sub').textContent='「'+code+'」行程需要暗號才能加入';
+        document.getElementById('join-pw-overlay').className='overlay show';
+        setTimeout(function(){document.getElementById('join-pw-input').focus();},100);
+      }
+    }).catch(function(){toast('連線失敗，請稍後再試');});
+  });
+};
+
+// 建立行程：設定暗號
+window.cancelSetPw=function(){
+  document.getElementById('set-pw-overlay').className='overlay';
+  pendingCode='';
+};
+window.confirmSetPw=function(){
+  var pw=document.getElementById('set-pw-input').value.trim();
+  if(!pw){toast('請輸入暗號');return;}
+  document.getElementById('set-pw-overlay').className='overlay';
+  // 寫入 Firebase groups/code/password
+  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
+    m.set(m.ref(db,'groups/'+pendingCode),{password:pw}).then(function(){
+      setAuth(pendingCode,'admin');
+      goToApp(pendingCode);
+    }).catch(function(){toast('建立失敗，請重試');});
+  });
+};
+
+// 加入行程：驗證暗號
+window.cancelJoinPw=function(){
+  document.getElementById('join-pw-overlay').className='overlay';
+  pendingCode='';
+};
+window.confirmJoinPw=function(){
+  var pw=document.getElementById('join-pw-input').value.trim();
+  if(!pw){toast('請輸入暗號');return;}
+  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
+    m.get(m.ref(db,'groups/'+pendingCode)).then(function(snap){
+      var data=snap.val();
+      if(data&&String(data.password)===String(pw)){
+        document.getElementById('join-pw-overlay').className='overlay';
+        setAuth(pendingCode,'member');
+        goToApp(pendingCode);
+      } else {
+        toast('暗號錯誤，請再試一次');
+        document.getElementById('join-pw-input').select();
+      }
+    }).catch(function(){toast('連線失敗，請稍後再試');});
+  });
+};
+
+// 顯示暗號（管理員）
+window.showGroupPw=function(){
+  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
+    m.get(m.ref(db,'groups/'+currentTripCode)).then(function(snap){
+      var data=snap.val();
+      document.getElementById('show-pw-content').textContent=data?data.password:'（找不到暗號）';
+      document.getElementById('show-pw-overlay').className='overlay show';
+    });
+  });
 };
 
 window.togglePinCurrent=function(){
@@ -507,6 +643,7 @@ window.leaveTrip=function(){
   document.getElementById('landing-page').style.display='block';
   renderHistory();
   goTab(0);
+  document.getElementById('trip-code-input').value='';
 };
 
 function startListening(defaultName){
@@ -1024,11 +1161,24 @@ window.renderCatChart=function renderCatChart(){
 }
 
 // ── INIT ───────────────────────────────────────────
-// 綁定圖表選單（module 內函式不是全域，用 addEventListener）
 document.addEventListener('change', function(e){
   if(e.target && e.target.id === 'cat-filter') renderCatChart();
 });
-renderHistory();
+
+// 自動登入：掃描 localStorage 找已認證的行程（取最近一筆）
+(function(){
+  var h=getHistory();
+  for(var i=0;i<h.length;i++){
+    var auth=getAuth(h[i].code);
+    if(auth&&(auth.role==='admin'||auth.role==='member')){
+      // 有認證紀錄 → 自動進入最近使用的行程
+      goToApp(h[i].code);
+      return;
+    }
+  }
+  // 沒有 → 顯示 landing
+  renderHistory();
+})();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </body>
