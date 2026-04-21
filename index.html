@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta name="apple-mobile-web-app-title" content="旅遊分帳">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <link rel="apple-touch-icon" href="屋嗚哇哇屋哇.png">
-    <link rel="icon" href="屋嗚哇哇屋哇.png">
-    
-    <meta name="theme-color" content="#ffffff">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>旅遊分帳</title>
@@ -83,8 +74,12 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
 .sp-btn{flex:1;padding:9px 8px;border-radius:20px;border:1.5px solid var(--sand3);background:var(--sand);font-size:13px;color:var(--ink3);font-family:-apple-system,sans-serif;cursor:pointer;text-align:center;}
 .sp-btn.on{background:var(--ocean3);color:var(--ocean2);border-color:var(--ocean);}
 .sp-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
-.sp-chk{display:inline-block;padding:8px 12px;border-radius:20px;border:1.5px solid var(--sand3);font-size:13px;background:var(--sand);cursor:pointer;font-family:-apple-system,sans-serif;}
-.sp-chk.on{background:var(--ocean3);color:var(--ocean2);border-color:var(--ocean);}
+.sp-chk{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--sand3);font-size:14px;background:var(--sand);cursor:pointer;font-family:-apple-system,sans-serif;width:100%;box-sizing:border-box;}
+.sp-chk.on{background:var(--ocean3);border-color:var(--ocean);}
+.sp-chk .chk-box{width:20px;height:20px;border-radius:6px;border:2px solid var(--sand3);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;}
+.sp-chk.on .chk-box{background:var(--ocean);border-color:var(--ocean);color:#fff;}
+.sp-chk .chk-name{font-size:14px;color:var(--ink);}
+.sp-members{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
 
 /* EXPENSE LIST */
 .eitem{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--sand3);}
@@ -170,6 +165,54 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
     <div class="modal-row">
       <button class="modal-btn cancel" onclick="closeDelExp()">取消</button>
       <button class="modal-btn danger" onclick="confirmDelExp()">確定刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編輯費用 -->
+<div class="overlay" id="edit-exp-overlay">
+  <div class="modal">
+    <div class="modal-title">編輯費用</div>
+    <div class="fmb" style="margin-top:8px;"><label>費用說明</label><input class="modal-input" type="text" id="edit-desc" placeholder="費用說明" style="margin-bottom:0;"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div><label>金額</label><input class="modal-input" type="number" id="edit-amt" placeholder="0" inputmode="decimal" style="margin-bottom:0;"/></div>
+      <div><label>幣別</label>
+        <select id="edit-cur" class="modal-input" style="margin-bottom:0;">
+          <option value="TWD">TWD 台幣</option>
+          <option value="JPY">JPY 日圓</option>
+          <option value="USD">USD 美元</option>
+          <option value="EUR">EUR 歐元</option>
+          <option value="GBP">GBP 英鎊</option>
+          <option value="CNY">CNY 人民幣</option>
+          <option value="KRW">KRW 韓圜</option>
+          <option value="VND">VND 越盾</option>
+          <option value="THB">THB 泰銖</option>
+          <option value="SGD">SGD 星幣</option>
+          <option value="HKD">HKD 港幣</option>
+          <option value="AUD">AUD 澳幣</option>
+          <option value="NZD">NZD 紐幣</option>
+          <option value="PHP">PHP 披索</option>
+          <option value="IDR">IDR 印尼盾</option>
+          <option value="MYR">MYR 馬幣</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;"><label>類別</label>
+      <select id="edit-cat" class="modal-input" style="margin-bottom:0;">
+        <option value="🍜">🍜 餐飲</option>
+        <option value="🏨">🏨 住宿</option>
+        <option value="🚆">🚆 交通</option>
+        <option value="🎡">🎡 娛樂</option>
+        <option value="🛍️">🛍️ 購物</option>
+        <option value="💊">💊 其他</option>
+      </select>
+    </div>
+    <div style="margin-bottom:10px;"><label>付款人</label>
+      <select id="edit-payer" class="modal-input" style="margin-bottom:0;"></select>
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn cancel" onclick="closeEditExp()">取消</button>
+      <button class="modal-btn confirm" onclick="confirmEditExp()">儲存</button>
     </div>
   </div>
 </div>
@@ -547,6 +590,7 @@ function goToApp(code){
   var auth=getAuth(code);
   var showPwBtn=document.getElementById('show-pw-btn');
   if(showPwBtn)showPwBtn.style.display=(auth&&auth.role==='admin')?'block':'none';
+  goTab(1);
   startListening('');
 }
 
@@ -837,14 +881,26 @@ function rSplit(){
   if(splitMode===0){el.innerHTML='<span style="font-size:12px;color:var(--ink3);">所有旅伴平均分攤</span>';return;}
   if(!members.length){el.innerHTML='<span style="font-size:12px;color:var(--ink3);">請先新增旅伴</span>';return;}
   splitSel=members.slice();
-  for(i=0;i<members.length;i++)
-    h+='<button class="sp-chk on" id="sc'+i+'" onclick="togSplit('+i+')">'+members[i]+'</button>';
+  for(i=0;i<members.length;i++){
+    var c=gc(members[i]);
+    h+='<button class="sp-chk on" id="sc'+i+'" onclick="togSplit('+i+')">'
+      +'<span class="chk-box">✓</span>'
+      +'<span class="chk-name">'+members[i]+'</span>'
+      +'</button>';
+  }
   el.innerHTML=h;
 }
 window.togSplit=function(i){
   var m=members[i],el=document.getElementById('sc'+i),p=splitSel.indexOf(m);
-  if(p>=0){splitSel.splice(p,1);el.className='sp-chk';}
-  else{splitSel.push(m);el.className='sp-chk on';}
+  if(p>=0){
+    splitSel.splice(p,1);
+    el.className='sp-chk';
+    el.querySelector('.chk-box').textContent='';
+  } else {
+    splitSel.push(m);
+    el.className='sp-chk on';
+    el.querySelector('.chk-box').textContent='✓';
+  }
 };
 
 // ── 費用 ───────────────────────────────────────────
@@ -884,6 +940,44 @@ window.confirmDelExp=function(){
   closeDelExp();rExp();persist();
 };
 
+var pendingEditExpId=-1;
+window.askEditExp=function(id){
+  var e=expenses.find(function(x){return x.id===id;});
+  if(!e)return;
+  pendingEditExpId=id;
+  document.getElementById('edit-desc').value=e.desc;
+  document.getElementById('edit-amt').value=e.amt;
+  document.getElementById('edit-cat').value=e.cat;
+  // 幣別
+  var curSel=document.getElementById('edit-cur');
+  for(var i=0;i<curSel.options.length;i++){if(curSel.options[i].value===e.cur){curSel.selectedIndex=i;break;}}
+  // 付款人
+  var payerSel=document.getElementById('edit-payer');
+  payerSel.innerHTML=members.map(function(m){return '<option'+(m===e.payer?' selected':'')+'>'+m+'</option>';}).join('');
+  document.getElementById('edit-exp-overlay').className='overlay show';
+};
+window.closeEditExp=function(){
+  document.getElementById('edit-exp-overlay').className='overlay';
+  pendingEditExpId=-1;
+};
+window.confirmEditExp=function(){
+  if(pendingEditExpId<0)return;
+  var desc=document.getElementById('edit-desc').value.trim();
+  var amt=parseFloat(document.getElementById('edit-amt').value);
+  var cur=document.getElementById('edit-cur').value;
+  var cat=document.getElementById('edit-cat').value;
+  var payer=document.getElementById('edit-payer').value;
+  if(!desc||isNaN(amt)||amt<=0||!payer){toast('請填寫完整資訊');return;}
+  var rate=getRate(cur);
+  for(var i=0;i<expenses.length;i++){
+    if(expenses[i].id===pendingEditExpId){
+      expenses[i]=Object.assign({},expenses[i],{desc:desc,amt:amt,cur:cur,cat:cat,payer:payer,twd:amt*rate});
+      break;
+    }
+  }
+  closeEditExp();rExp();persist();toast('已更新 ✓');
+};
+
 function rExp(){
   var el=document.getElementById('elist'),h='',i,e,c,sl,am;
   if(!expenses.length){el.innerHTML='<div class="empty">尚無費用記錄</div>';return;}
@@ -896,7 +990,10 @@ function rExp(){
       +'<div class="emt"><span class="pchip" style="background:'+c.bg+';color:'+c.tx+';">'+e.payer+'</span> 付 · '+sl+'</div></div>'
       +'<div class="ert"><div class="eam"><span class="ctag">'+e.cur+'</span> '+am+'</div>'
       +'<div class="etw">≈ TWD '+Math.round(e.twd).toLocaleString()+'</div>'
-      +'<button class="dbtn" onclick="askDelExp('+e.id+')">刪除</button></div></div>';
+      +'<div style="display:flex;gap:5px;margin-top:4px;">'
+      +'<button class="dbtn" onclick="askEditExp('+e.id+')">編輯</button>'
+      +'<button class="dbtn" onclick="askDelExp('+e.id+')" style="color:#dc2626;border-color:#fca5a5;">刪除</button>'
+      +'</div></div></div>';
   }
   el.innerHTML=h;rSum();
 }
