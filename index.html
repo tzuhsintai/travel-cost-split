@@ -695,30 +695,48 @@ window.togglePinCurrent=function(){
 };
 
 window.leaveTrip=function(){
-  if(dataUnsub)dataUnsub();
-  if(connUnsub)connUnsub();
+  // 確實解除所有 Firebase listener
+  try{if(dataUnsub){dataUnsub();dataUnsub=null;}}catch(e){}
+  try{if(connUnsub){connUnsub();connUnsub=null;}}catch(e){}
+  // 清空所有狀態
   members=[];expenses=[];tripName='';splitMode=0;splitSel=[];
-  currentTripCode='';ROOT=null;
+  currentTripCode='';ROOT=null;writing=false;
+  // 清空結算頁面 DOM，防止殘留
+  var stot=document.getElementById('stot');if(stot)stot.textContent='$0';
+  var scnt=document.getElementById('scnt');if(scnt)scnt.textContent='0';
+  var psum=document.getElementById('psum');if(psum)psum.innerHTML='<div class="empty">尚無資料</div>';
+  var slist=document.getElementById('slist');if(slist)slist.innerHTML='<div class="empty">尚無資料</div>';
+  var elist=document.getElementById('elist');if(elist)elist.innerHTML='<div class="empty">尚無費用記錄</div>';
+  var mlist=document.getElementById('mlist');if(mlist)mlist.innerHTML='<span style="font-size:12px;color:var(--ink3);">尚未新增旅伴</span>';
+  // 隱藏統計圖
+  var cw=document.getElementById('cat-chart-wrap');if(cw)cw.style.display='none';
+  var ce=document.getElementById('cat-chart-empty');if(ce)ce.style.display='block';
+  if(catChartInstance){try{catChartInstance.destroy();}catch(e){}catChartInstance=null;}
+  // 切回 landing
   document.getElementById('main-app').style.display='none';
   document.getElementById('landing-page').style.display='block';
   renderHistory();
-  goTab(0);
   document.getElementById('trip-code-input').value='';
 };
 
 function startListening(defaultName){
+  // 進入前先清除舊的 listener
+  try{if(dataUnsub){dataUnsub();dataUnsub=null;}}catch(e){}
+  try{if(connUnsub){connUnsub();connUnsub=null;}}catch(e){}
+
   var connRef=ref(db,'.info/connected');
   connUnsub=onValue(connRef,function(snap){setSyncStatus(snap.val()===true);});
 
+  var listenCode=currentTripCode;
   dataUnsub=onValue(ROOT,function(snap){
+    if(listenCode!==currentTripCode)return;
     if(writing)return;
     var d=snap.val();
     if(!d){
-      // 新行程，若有傳入名稱就初始化
-      if(defaultName){
-        tripName=defaultName;
-        set(ROOT,{members:[],expenses:[],tripName:tripName});
-      }
+      // 新行程：使用代碼當作預設名稱
+      tripName=currentTripCode;
+      set(ROOT,{members:[],expenses:[],tripName:tripName});
+      saveHistory(currentTripCode,tripName);
       renderAll();
       setSyncStatus(true);
       return;
