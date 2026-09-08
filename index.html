@@ -571,6 +571,16 @@ window.quickEnter=function(code){
   enterTrip();
 };
 
+// 本機裝置 ID（固定，不會變）
+function getDeviceId(){
+  var id=localStorage.getItem('_deviceId');
+  if(!id){
+    id='dev_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+    localStorage.setItem('_deviceId',id);
+  }
+  return id;
+}
+
 // 取得本機 auth 紀錄
 function getAuth(code){
   try{return JSON.parse(localStorage.getItem('auth_'+code)||'null');}catch(e){return null;}
@@ -588,10 +598,25 @@ function goToApp(code){
   document.getElementById('hero-sub').textContent='行程代碼：'+code;
   var pinBtn=document.getElementById('pin-btn');
   if(pinBtn)pinBtn.textContent=isPinned(code)?'📌 已置頂':'📌 置頂';
-  // 顯示/隱藏暗號按鈕
-  var auth=getAuth(code);
+  // 從 Firebase 讀 adminDevice，比對本機 deviceId 判斷是否為管理員
   var showPwBtn=document.getElementById('show-pw-btn');
-  if(showPwBtn)showPwBtn.style.display=(auth&&auth.role==='admin')?'block':'none';
+  if(showPwBtn)showPwBtn.style.display='none';  // 預設隱藏，等查詢結果
+  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
+    m.get(m.ref(db,'groups/'+code)).then(function(snap){
+      var d=snap.val();
+      var isAdmin=d&&d.adminDevice&&d.adminDevice===getDeviceId();
+      // 也接受 localStorage 的 admin 紀錄（向下相容舊資料）
+      var localAuth=getAuth(code);
+      if(!isAdmin&&localAuth&&localAuth.role==='admin'){
+        // 舊版：把 deviceId 補存進 Firebase
+        isAdmin=true;
+        if(d&&!d.adminDevice){
+          m.set(m.ref(db,'groups/'+code+'/adminDevice'),getDeviceId());
+        }
+      }
+      if(showPwBtn)showPwBtn.style.display=isAdmin?'block':'none';
+    }).catch(function(){});
+  });
   goTab(1);
   startListening('');
 }
@@ -644,9 +669,10 @@ window.confirmSetPw=function(){
   var pw=document.getElementById('set-pw-input').value.trim();
   if(!pw){toast('請輸入暗號');return;}
   document.getElementById('set-pw-overlay').className='overlay';
-  // 寫入 Firebase groups/code/password
+  var deviceId=getDeviceId();
   import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
-    m.set(m.ref(db,'groups/'+pendingCode),{password:pw}).then(function(){
+    // 把 password 和 adminDevice 一起存進 Firebase
+    m.set(m.ref(db,'groups/'+pendingCode),{password:pw,adminDevice:deviceId}).then(function(){
       setAuth(pendingCode,'admin');
       goToApp(pendingCode);
     }).catch(function(){toast('建立失敗，請重試');});
