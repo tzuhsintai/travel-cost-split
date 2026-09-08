@@ -342,7 +342,7 @@ input:focus,select:focus{border-color:var(--ocean);background:#fff;}
             </div>
           </div>
           <button class="btn" id="save-name-btn" onclick="saveTripName()" style="display:none;">儲存名稱</button>
-          <button class="btn" id="show-pw-btn" onclick="showGroupPw()" style="display:none;margin-top:8px;background:var(--ink3);">🔑 顯示入群暗號</button>
+          <button class="btn" id="show-pw-btn" onclick="showGroupPw()" style="display:none;margin-top:8px;background:var(--ink3);">🔑 查看入群暗號</button>
         </div>
         <div class="card">
           <div class="card-hd"><div class="cic" style="background:#D4EDD8;">👥</div><div class="ctt">旅伴名單</div></div>
@@ -598,25 +598,10 @@ function goToApp(code){
   document.getElementById('hero-sub').textContent='行程代碼：'+code;
   var pinBtn=document.getElementById('pin-btn');
   if(pinBtn)pinBtn.textContent=isPinned(code)?'📌 已置頂':'📌 置頂';
-  // 從 Firebase 讀 adminDevice，比對本機 deviceId 判斷是否為管理員
+  // 所有已認證的成員都能看到暗號按鈕
   var showPwBtn=document.getElementById('show-pw-btn');
-  if(showPwBtn)showPwBtn.style.display='none';  // 預設隱藏，等查詢結果
-  import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js").then(function(m){
-    m.get(m.ref(db,'groups/'+code)).then(function(snap){
-      var d=snap.val();
-      var isAdmin=d&&d.adminDevice&&d.adminDevice===getDeviceId();
-      // 也接受 localStorage 的 admin 紀錄（向下相容舊資料）
-      var localAuth=getAuth(code);
-      if(!isAdmin&&localAuth&&localAuth.role==='admin'){
-        // 舊版：把 deviceId 補存進 Firebase
-        isAdmin=true;
-        if(d&&!d.adminDevice){
-          m.set(m.ref(db,'groups/'+code+'/adminDevice'),getDeviceId());
-        }
-      }
-      if(showPwBtn)showPwBtn.style.display=isAdmin?'block':'none';
-    }).catch(function(){});
-  });
+  var auth=getAuth(code);
+  if(showPwBtn)showPwBtn.style.display=(auth&&(auth.role==='admin'||auth.role==='member'))?'block':'none';
   goTab(1);
   startListening('');
 }
